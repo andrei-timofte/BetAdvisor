@@ -1,0 +1,47 @@
+TP-47, KajHa, 3, 0
+VIFK, JS Hercules, 1, 1
+JBK, PK-37, 4, 0
+GBK Kokkola, Narpes Kraft, 1, 2
+OTP, KuFu-98, 0, 2
+AC Kajaani, FC Villiketut, 6, 0
+KuFu-98, AC Kajaani, 0, 3
+KajHa, JBK, 0, 0
+JS Hercules, GBK Kokkola, 1, 1
+PK-37, Narpes Kraft, 2, 1
+TP-47, FC Villiketut, 4, 1
+OTP, VIFK, 0, 0
+JBK, OTP, 4, 0
+GBK Kokkola, KuFu-98, 0, 5
+VIFK, TP-47, 2, 0
+FC Villiketut, PK-37, 1, 1
+Narpes Kraft, JS Hercules, 3, 1
+VIFK, JBK, 1, 1
+OTP, AC Kajaani, 0, 3
+JS Hercules, FC Villiketut, 6, 4
+TP-47, PK-37, 0, 0
+KuFu-98, Narpes Kraft, 1, 1
+KajHa, GBK Kokkola, 1, 3
+GBK Kokkola, OTP, 1, 0
+JBK, TP-47, 4, 2
+Narpes Kraft, KajHa, 4, 1
+AC Kajaani, VIFK, 2, 1
+PK-37, JS Hercules, 0, 0
+FC Villiketut, KuFu-98, 1, 1
+KuFu-98, PK-37, 0, 1
+TP-47, JS Hercules, 2, 1
+JBK, AC Kajaani, 0, 3
+VIFK, GBK Kokkola, 1, 0
+OTP, Narpes Kraft, 3, 3
+KajHa, FC Villiketut, 0, 1
+PK-37, KajHa, 2, 3
+FC Villiketut, OTP, 0, 0
+JS Hercules, KuFu-98, 2, 1
+GBK Kokkola, JBK, 4, 0
+VIFK, KajHa, 2, 1
+AC Kajaani, TP-47, 2, 0
+JBK, Narpes Kraft, 3, 1
+KajHa, JS Hercules, 3, 1
+TP-47, KuFu-98, 2, 1
+VIFK, FC Villiketut, 9, 0
+AC Kajaani, GBK Kokkola, 1, 2
+OTP, PK-37, 0, 1

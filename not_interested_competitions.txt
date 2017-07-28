@@ -1,0 +1,93 @@
+argentina - primera division (rezerve)
+australia - victoria premier league u20
+brazilia - cupa
+camerun - elite two
+int.tin.- ce u21 - playoffs
+japonia - cupa ligii
+norvegia - divizia 3 - gr.1
+norvegia - divizia 3 - gr.2
+norvegia - divizia 3 - gr.3
+norvegia - divizia 3 - gr.4
+norvegia - divizia 3 - gr.6
+rwanda - peace cup
+suedia - cupa suediei
+suedia - div.3 mellersta gotaland
+suedia - div.3 nordostra gotaland
+suedia - div.3 ostra svealand
+suedia - div.3 sodra gotaland
+thailanda - division 2
+vietnam - second division
+argentina - cupa
+sua - premier development league
+columbia - primera b - clausura
+estonia - esiliiga b
+islanda - cupa
+polonia - supercupa
+romania - supercupa
+rusia - fnl
+algeria - cupa
+australia - nsw premier league 2
+australia - queensland npl u20
+belarus - cupa
+brazilia - carioca serie b
+brazilia - paulista u20 -1st div. gr.1
+brazilia - paulista u20 1st div. - gr.2
+brazilia - paulista u20 1st div. - gr.3
+brazilia - paulista u20 1st div. - gr.4
+brazilia - u20 campeonato - gr.a
+columbia - cupa
+singapore - nfl division 1
+suedia - div.3 sydvastra gotaland
+thailanda - division 1
+uruguay - segunda division
+vietnam - v-league 2
+mexic - supercopa mx
+rusia - supercupa
+sua - cupa us open
+scotia - cupa ligii - gr.a
+scotia - cupa ligii - gr.b
+scotia - cupa ligii - gr.c
+scotia - cupa ligii - gr.d
+scotia - cupa ligii - gr.e
+scotia - cupa ligii - gr.f
+scotia - cupa ligii - gr.g
+scotia - cupa ligii - gr.h
+singapore - cupa ligii - gr. a
+ucraina - supercupa
+china - cupa fa
+finlanda - divizia 3 - helsinki/uusimaa 2
+finlanda - divizia 3 - ita/keski suomi
+finlanda - divizia 3 - pohjois - suomi
+finlanda - divizia 3 - tampere
+finlanda - divizia 3 - turku
+islanda - 4 deild gr. b
+norvegia - cupa nm
+norvegia - divizia 3 - gr.5
+singapore - cupa
+spania - segunda division - playoffs de promovare
+suedia - div.3 mellersta norrland
+suedia - div.3 nordvastra gotaland
+suedia - div.3 sodra norrland
+suedia - div.3 sodra svealand
+suedia - div.3 sydostra gotaland
+suedia - div.3 vastra svealand
+suedia amatori - u19 - allsvenskan nord
+suedia amatori - u19 - allsvenskan sud
+cehia - liga i
+franta - trofeul campionilor
+rusia - cupa
+austria - cupa kfv
+brazilia - u20 camp.brasileiro - gr.d
+cehia - divizia a ii-a
+finlanda - suomen cup
+germania - liga reg.bavaria
+islanda - u19 league - deild a
+mexic - cupa mx - apertura - gr.1
+mexic - cupa mx - apertura - gr.3
+mexic - cupa mx - apertura - gr.4
+mexic - cupa mx - apertura - gr.6
+mexic - cupa mx - apertura - gr.8
+mexic - cupa mx - apertura - gr.9
+polonia - cupa
+australia - cupa ffa
+brazilia - u20 campeonato - gr.c

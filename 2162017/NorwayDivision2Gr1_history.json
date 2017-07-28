@@ -1,0 +1,70 @@
+KFUM, Baerum, 1, 1
+Alta, Follo, 2, 0
+Asker, HamKam, 1, 5
+Brumunddal, Kjelsas, 1, 0
+Nybergsund, Skeid, 0, 1
+Finnsnes, Grorud, 0, 1
+Valerenga B, Raufoss, 0, 1
+Grorud, KFUM, 3, 2
+Baerum, Alta, 1, 1
+Follo, Nybergsund, 0, 1
+Kjelsas, Finnsnes, 1, 2
+HamKam, Brumunddal, 1, 0
+Raufoss, Asker, 0, 0
+Skeid, Valerenga B, 2, 0
+Grorud, Kjelsas, 4, 1
+KFUM, Alta, 2, 4
+Brumunddal, Raufoss, 0, 3
+Finnsnes, HamKam, 0, 1
+Asker, Skeid, 0, 3
+Nybergsund, Baerum, 1, 2
+Valerenga B, Follo, 3, 2
+HamKam, Grorud, 3, 0
+Kjelsas, KFUM, 1, 0
+Follo, Asker, 0, 0
+Raufoss, Finnsnes, 1, 3
+Alta, Nybergsund, 2, 1
+Skeid, Brumunddal, 2, 0
+Baerum, Valerenga B, 1, 2
+Valerenga B, Alta, 0, 3
+KFUM, Nybergsund, 1, 2
+Asker, Baerum, 2, 2
+Grorud, Raufoss, 0, 2
+Brumunddal, Follo, 1, 3
+Kjelsas, HamKam, 0, 0
+Finnsnes, Skeid, 0, 0
+Alta, Asker, 2, 2
+Baerum, Brumunddal, 4, 1
+Skeid, Grorud, 0, 1
+HamKam, KFUM, 1, 0
+Raufoss, Kjelsas, 2, 2
+Follo, Finnsnes, 2, 1
+Nybergsund, Valerenga B, 2, 3
+Grorud, Follo, 3, 0
+Finnsnes, Baerum, 2, 3
+Asker, Nybergsund, 2, 2
+Kjelsas, Skeid, 1, 1
+HamKam, Raufoss, 2, 0
+Brumunddal, Alta, 0, 0
+KFUM, Valerenga B, 4, 0
+Nybergsund, Brumunddal, 0, 0
+Follo, Kjelsas, 0, 1
+Baerum, Grorud, 4, 0
+Alta, Finnsnes, 1, 0
+Raufoss, KFUM, 0, 2
+Skeid, HamKam, 4, 0
+Grorud, Alta, 2, 2
+Brumunddal, Valerenga B, 2, 1
+Kjelsas, Baerum, 2, 1
+HamKam, Follo, 3, 0
+KFUM, Asker, 3, 3
+Raufoss, Skeid, 2, 1
+Finnsnes, Nybergsund, 1, 2
+Valerenga B, Asker, 0, 1
+Alta, Kjelsas, 1, 0
+Nybergsund, Grorud, 3, 4
+Baerum, HamKam, 3, 3
+Asker, Brumunddal, 1, 0
+Follo, Raufoss, 0, 5
+Skeid, KFUM, 1, 2
+Valerenga B, Finnsnes, 2, 1

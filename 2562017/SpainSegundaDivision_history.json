@@ -1,0 +1,462 @@
+Almeria, Cadiz, 1, 1
+Mirandes, Getafe, 1, 1
+Cordoba, Tenerife, 1, 0
+Elche, Rayo Vallecano, 2, 1
+Mallorca, Reus, 0, 1
+Alcorcon, Huesca, 0, 0
+Valladolid, Real Oviedo, 1, 0
+Sevilla At., Girona, 3, 3
+Numancia, Levante, 0, 1
+Gimnastic, Lugo, 2, 2
+Zaragoza, UCAM Murcia, 3, 1
+Tenerife, Sevilla At., 1, 1
+Getafe, Numancia, 0, 0
+Lugo, Zaragoza, 3, 3
+Real Oviedo, Almeria, 2, 0
+Girona, Elche, 3, 1
+Reus, Mirandes, 1, 1
+Cadiz, Mallorca, 1, 1
+Rayo Vallecano, Valladolid, 0, 0
+Levante, Alcorcon, 2, 0
+UCAM Murcia, Cordoba, 1, 1
+Huesca, Gimnastic, 1, 1
+Cordoba, Lugo, 3, 3
+Sevilla At., UCAM Murcia, 1, 1
+Elche, Tenerife, 3, 1
+Valladolid, Girona, 2, 1
+Almeria, Rayo Vallecano, 3, 0
+Getafe, Reus, 1, 1
+Mirandes, Cadiz, 3, 2
+Zaragoza, Huesca, 1, 0
+Mallorca, Real Oviedo, 0, 0
+Gimnastic, Levante, 1, 1
+Numancia, Alcorcon, 1, 1
+Levante, Zaragoza, 4, 2
+Tenerife, Valladolid, 1, 0
+Reus, Numancia, 1, 1
+Lugo, Sevilla At., 1, 0
+Girona, Almeria, 3, 3
+UCAM Murcia, Elche, 1, 1
+Cadiz, Getafe, 3, 0
+Huesca, Cordoba, 3, 0
+Alcorcon, Gimnastic, 1, 0
+Real Oviedo, Mirandes, 0, 0
+Rayo Vallecano, Mallorca, 1, 0
+Zaragoza, Alcorcon, 2, 0
+Valladolid, UCAM Murcia, 0, 1
+Cordoba, Levante, 1, 0
+Reus, Cadiz, 1, 0
+Elche, Lugo, 0, 3
+Numancia, Gimnastic, 1, 0
+Mallorca, Girona, 1, 0
+Getafe, Real Oviedo, 2, 1
+Sevilla At., Huesca, 2, 0
+Mirandes, Rayo Vallecano, 2, 1
+Almeria, Tenerife, 0, 1
+Cadiz, Numancia, 1, 0
+Gimnastic, Zaragoza, 0, 0
+Alcorcon, Cordoba, 0, 1
+Lugo, Valladolid, 1, 0
+UCAM Murcia, Almeria, 4, 0
+Huesca, Elche, 0, 3
+Levante, Sevilla At., 1, 0
+Tenerife, Mallorca, 0, 0
+Girona, Mirandes, 1, 1
+Real Oviedo, Reus, 0, 1
+Rayo Vallecano, Getafe, 2, 0
+Elche, Levante, 0, 1
+Almeria, Lugo, 0, 0
+Valladolid, Huesca, 1, 2
+Cordoba, Gimnastic, 2, 0
+Sevilla At., Alcorcon, 1, 1
+Reus, Rayo Vallecano, 1, 1
+Getafe, Girona, 0, 2
+Mallorca, UCAM Murcia, 0, 0
+Numancia, Zaragoza, 2, 1
+Mirandes, Tenerife, 3, 2
+Cadiz, Real Oviedo, 0, 2
+Zaragoza, Cordoba, 1, 1
+Lugo, Mallorca, 3, 1
+Alcorcon, Elche, 1, 0
+Gimnastic, Sevilla At., 1, 1
+Huesca, Almeria, 2, 0
+Rayo Vallecano, Cadiz, 3, 0
+Real Oviedo, Numancia, 2, 2
+Tenerife, Getafe, 0, 0
+Levante, Valladolid, 3, 2
+Girona, Reus, 1, 0
+UCAM Murcia, Mirandes, 2, 2
+Sevilla At., Zaragoza, 2, 1
+Elche, Gimnastic, 4, 4
+Getafe, UCAM Murcia, 2, 0
+Numancia, Cordoba, 1, 1
+Valladolid, Alcorcon, 2, 0
+Reus, Tenerife, 0, 0
+Mallorca, Huesca, 3, 0
+Cadiz, Girona, 0, 0
+Almeria, Levante, 2, 2
+Mirandes, Lugo, 2, 2
+Real Oviedo, Rayo Vallecano, 2, 0
+Levante, Mallorca, 2, 1
+Girona, Real Oviedo, 0, 0
+Alcorcon, Almeria, 0, 0
+Huesca, Mirandes, 3, 0
+Lugo, Getafe, 0, 1
+Tenerife, Cadiz, 1, 1
+UCAM Murcia, Reus, 0, 2
+Gimnastic, Valladolid, 1, 2
+Rayo Vallecano, Numancia, 3, 3
+Cordoba, Sevilla At., 0, 1
+Zaragoza, Elche, 1, 3
+Rayo Vallecano, Girona, 1, 0
+Reus, Lugo, 2, 1
+Getafe, Huesca, 1, 1
+Numancia, Sevilla At., 1, 2
+Elche, Cordoba, 1, 1
+Real Oviedo, Tenerife, 2, 0
+Cadiz, UCAM Murcia, 2, 2
+Mirandes, Levante, 0, 3
+Almeria, Gimnastic, 3, 0
+Mallorca, Alcorcon, 1, 0
+Valladolid, Zaragoza, 0, 0
+Cordoba, Valladolid, 1, 1
+Zaragoza, Almeria, 2, 1
+Tenerife, Rayo Vallecano, 3, 2
+Huesca, Reus, 2, 1
+Levante, Getafe, 1, 1
+Alcorcon, Mirandes, 1, 0
+Gimnastic, Mallorca, 2, 2
+UCAM Murcia, Real Oviedo, 0, 1
+Lugo, Cadiz, 0, 1
+Girona, Numancia, 3, 0
+Sevilla At., Elche, 2, 0
+Mallorca, Zaragoza, 2, 2
+Girona, Tenerife, 1, 1
+Valladolid, Sevilla At., 2, 0
+Rayo Vallecano, UCAM Murcia, 0, 1
+Cadiz, Huesca, 1, 0
+Reus, Levante, 0, 1
+Almeria, Cordoba, 3, 1
+Real Oviedo, Lugo, 1, 1
+Getafe, Alcorcon, 1, 0
+Numancia, Elche, 2, 2
+Mirandes, Gimnastic, 0, 1
+Cordoba, Mallorca, 0, 2
+Levante, Cadiz, 0, 0
+Alcorcon, Reus, 1, 0
+Tenerife, Numancia, 1, 1
+Huesca, Real Oviedo, 4, 0
+Gimnastic, Getafe, 1, 0
+Elche, Valladolid, 2, 0
+Zaragoza, Mirandes, 2, 0
+UCAM Murcia, Girona, 0, 1
+Sevilla At., Almeria, 1, 0
+Lugo, Rayo Vallecano, 1, 0
+Almeria, Elche, 2, 1
+Girona, Lugo, 3, 1
+Real Oviedo, Levante, 2, 0
+Mallorca, Sevilla At., 2, 2
+Numancia, Valladolid, 2, 1
+Mirandes, Cordoba, 1, 1
+Rayo Vallecano, Huesca, 2, 2
+Tenerife, UCAM Murcia, 2, 1
+Cadiz, Alcorcon, 4, 1
+Getafe, Zaragoza, 1, 0
+Reus, Gimnastic, 1, 0
+Gimnastic, Cadiz, 1, 0
+Zaragoza, Reus, 2, 2
+Alcorcon, Real Oviedo, 5, 1
+UCAM Murcia, Numancia, 3, 2
+Valladolid, Almeria, 0, 0
+Lugo, Tenerife, 1, 3
+Sevilla At., Mirandes, 1, 0
+Cordoba, Getafe, 1, 3
+Huesca, Girona, 1, 2
+Elche, Mallorca, 1, 0
+Getafe, Sevilla At., 2, 0
+Cadiz, Zaragoza, 3, 0
+Mirandes, Elche, 1, 0
+Numancia, Almeria, 1, 0
+UCAM Murcia, Lugo, 1, 2
+Reus, Cordoba, 1, 2
+Mallorca, Valladolid, 0, 3
+Tenerife, Huesca, 1, 1
+Real Oviedo, Gimnastic, 1, 0
+Rayo Vallecano, Alcorcon, 2, 0
+Girona, Levante, 2, 1
+Sevilla At., Reus, 0, 1
+Levante, Tenerife, 1, 0
+Huesca, UCAM Murcia, 5, 2
+Elche, Getafe, 2, 2
+Gimnastic, Rayo Vallecano, 0, 1
+Zaragoza, Real Oviedo, 2, 1
+Alcorcon, Girona, 2, 1
+Lugo, Numancia, 3, 1
+Valladolid, Mirandes, 5, 0
+Cordoba, Cadiz, 1, 3
+Almeria, Mallorca, 2, 1
+Levante, Rayo Vallecano, 1, 0
+Reus, Elche, 0, 1
+Girona, Gimnastic, 4, 2
+Real Oviedo, Cordoba, 1, 2
+Lugo, Huesca, 1, 1
+Tenerife, Alcorcon, 2, 0
+Getafe, Valladolid, 3, 1
+Cadiz, Sevilla At., 4, 1
+Numancia, Mallorca, 3, 1
+Mirandes, Almeria, 2, 1
+Rayo Vallecano, Zaragoza, 1, 2
+Mallorca, Mirandes, 2, 0
+Numancia, Huesca, 0, 0
+Almeria, Getafe, 0, 1
+Valladolid, Reus, 1, 0
+Cordoba, Rayo Vallecano, 0, 0
+Levante, Lugo, 1, 0
+Sevilla At., Real Oviedo, 5, 3
+Zaragoza, Girona, 0, 2
+Elche, Cadiz, 2, 3
+Gimnastic, Tenerife, 1, 1
+Alcorcon, UCAM Murcia, 0, 0
+UCAM Murcia, Levante, 0, 2
+Cadiz, Valladolid, 0, 1
+Tenerife, Zaragoza, 1, 0
+UCAM Murcia, Gimnastic, 1, 1
+Mirandes, Numancia, 0, 3
+Real Oviedo, Elche, 2, 1
+Rayo Vallecano, Sevilla At., 1, 1
+Girona, Cordoba, 2, 0
+Lugo, Alcorcon, 1, 0
+Huesca, Levante, 0, 2
+Reus, Almeria, 1, 0
+Getafe, Mallorca, 1, 1
+UCAM Murcia, Zaragoza, 1, 0
+Tenerife, Cordoba, 2, 0
+Rayo Vallecano, Elche, 1, 1
+Huesca, Alcorcon, 0, 1
+Lugo, Gimnastic, 2, 3
+Real Oviedo, Valladolid, 1, 0
+Cadiz, Almeria, 1, 0
+Girona, Sevilla At., 2, 0
+Getafe, Mirandes, 1, 1
+Reus, Mallorca, 1, 1
+Levante, Numancia, 1, 0
+Elche, Girona, 1, 0
+Valladolid, Rayo Vallecano, 2, 1
+Gimnastic, Huesca, 0, 0
+Mirandes, Reus, 1, 1
+Alcorcon, Levante, 2, 0
+Sevilla At., Tenerife, 0, 0
+Zaragoza, Lugo, 1, 1
+Almeria, Real Oviedo, 3, 0
+Mallorca, Cadiz, 0, 0
+Cordoba, UCAM Murcia, 1, 1
+Numancia, Getafe, 2, 0
+UCAM Murcia, Sevilla At., 1, 0
+Huesca, Zaragoza, 2, 3
+Lugo, Cordoba, 1, 0
+Tenerife, Elche, 2, 0
+Cadiz, Mirandes, 2, 1
+Alcorcon, Numancia, 2, 3
+Girona, Valladolid, 2, 1
+Reus, Getafe, 1, 1
+Levante, Gimnastic, 2, 1
+Rayo Vallecano, Almeria, 1, 0
+Real Oviedo, Mallorca, 2, 1
+Sevilla At., Lugo, 1, 1
+Getafe, Cadiz, 3, 2
+Gimnastic, Alcorcon, 1, 1
+Zaragoza, Levante, 0, 1
+Almeria, Girona, 0, 0
+Mallorca, Rayo Vallecano, 2, 1
+Mirandes, Real Oviedo, 0, 2
+Elche, UCAM Murcia, 1, 1
+Numancia, Reus, 1, 0
+Valladolid, Tenerife, 0, 0
+Cordoba, Huesca, 0, 2
+Lugo, Elche, 1, 2
+Girona, Mallorca, 1, 0
+Gimnastic, Numancia, 2, 0
+Tenerife, Almeria, 1, 0
+Levante, Cordoba, 3, 1
+UCAM Murcia, Valladolid, 1, 3
+Alcorcon, Zaragoza, 1, 1
+Real Oviedo, Getafe, 2, 1
+Rayo Vallecano, Mirandes, 1, 2
+Cadiz, Reus, 0, 0
+Huesca, Sevilla At., 2, 1
+Reus, Real Oviedo, 1, 1
+Getafe, Rayo Vallecano, 1, 0
+Mallorca, Tenerife, 1, 4
+Mirandes, Girona, 0, 2
+Elche, Huesca, 1, 1
+Cordoba, Alcorcon, 1, 0
+Zaragoza, Gimnastic, 1, 2
+Valladolid, Lugo, 1, 1
+Sevilla At., Levante, 1, 1
+Almeria, UCAM Murcia, 2, 3
+Numancia, Cadiz, 0, 3
+Tenerife, Mirandes, 1, 1
+Real Oviedo, Cadiz, 2, 1
+Rayo Vallecano, Reus, 0, 0
+Girona, Getafe, 5, 1
+Alcorcon, Sevilla At., 0, 0
+Zaragoza, Numancia, 3, 0
+Levante, Elche, 2, 1
+Lugo, Almeria, 1, 2
+Gimnastic, Cordoba, 2, 1
+Huesca, Valladolid, 1, 0
+UCAM Murcia, Mallorca, 1, 1
+Elche, Alcorcon, 0, 0
+Valladolid, Levante, 0, 4
+Mallorca, Lugo, 1, 1
+Cordoba, Zaragoza, 2, 1
+Mirandes, UCAM Murcia, 1, 1
+Numancia, Real Oviedo, 0, 0
+Sevilla At., Gimnastic, 2, 2
+Almeria, Huesca, 0, 0
+Getafe, Tenerife, 2, 2
+Reus, Girona, 1, 2
+Cadiz, Rayo Vallecano, 1, 0
+Gimnastic, Elche, 1, 3
+Zaragoza, Sevilla At., 1, 2
+Huesca, Mallorca, 2, 1
+UCAM Murcia, Getafe, 2, 0
+Lugo, Mirandes, 2, 1
+Cordoba, Numancia, 0, 0
+Girona, Cadiz, 1, 2
+Rayo Vallecano, Real Oviedo, 2, 0
+Alcorcon, Valladolid, 1, 2
+Tenerife, Reus, 0, 1
+Levante, Almeria, 1, 0
+Real Oviedo, Girona, 2, 0
+Mallorca, Levante, 1, 1
+Numancia, Rayo Vallecano, 0, 0
+Almeria, Alcorcon, 3, 1
+Valladolid, Gimnastic, 1, 2
+Reus, UCAM Murcia, 0, 0
+Elche, Zaragoza, 0, 3
+Getafe, Lugo, 2, 0
+Mirandes, Huesca, 1, 3
+Cadiz, Tenerife, 0, 1
+Sevilla At., Cordoba, 1, 0
+Alcorcon, Mallorca, 1, 0
+Levante, Mirandes, 2, 1
+Huesca, Getafe, 0, 0
+UCAM Murcia, Cadiz, 1, 1
+Girona, Rayo Vallecano, 1, 3
+Lugo, Reus, 1, 0
+Tenerife, Real Oviedo, 1, 0
+Gimnastic, Almeria, 0, 1
+Cordoba, Elche, 1, 0
+Zaragoza, Valladolid, 1, 1
+Sevilla At., Numancia, 1, 1
+Mirandes, Alcorcon, 2, 0
+Mallorca, Gimnastic, 0, 0
+Cadiz, Lugo, 1, 1
+Getafe, Levante, 2, 0
+Rayo Vallecano, Tenerife, 1, 1
+Valladolid, Cordoba, 2, 1
+Real Oviedo, UCAM Murcia, 2, 0
+Almeria, Zaragoza, 2, 2
+Reus, Huesca, 0, 1
+Elche, Sevilla At., 3, 2
+Numancia, Girona, 0, 2
+Elche, Numancia, 1, 3
+Tenerife, Girona, 3, 3
+Gimnastic, Mirandes, 4, 1
+Huesca, Cadiz, 1, 1
+Alcorcon, Getafe, 0, 3
+Sevilla At., Valladolid, 6, 2
+UCAM Murcia, Rayo Vallecano, 0, 1
+Cordoba, Almeria, 1, 0
+Zaragoza, Mallorca, 1, 0
+Lugo, Real Oviedo, 2, 1
+Levante, Reus, 0, 0
+Real Oviedo, Huesca, 1, 1
+Girona, UCAM Murcia, 1, 2
+Cadiz, Levante, 1, 1
+Getafe, Gimnastic, 1, 1
+Rayo Vallecano, Lugo, 2, 0
+Valladolid, Elche, 2, 1
+Almeria, Sevilla At., 2, 1
+Reus, Alcorcon, 0, 0
+Mirandes, Zaragoza, 0, 1
+Mallorca, Cordoba, 1, 1
+Numancia, Tenerife, 1, 1
+Elche, Almeria, 2, 3
+Zaragoza, Getafe, 1, 2
+Levante, Real Oviedo, 1, 0
+Valladolid, Numancia, 1, 1
+UCAM Murcia, Tenerife, 1, 0
+Sevilla At., Mallorca, 2, 3
+Cordoba, Mirandes, 1, 1
+Lugo, Girona, 1, 2
+Alcorcon, Cadiz, 0, 2
+Gimnastic, Reus, 0, 1
+Huesca, Rayo Vallecano, 2, 0
+Real Oviedo, Alcorcon, 0, 1
+Girona, Huesca, 3, 1
+Rayo Vallecano, Levante, 2, 1
+Numancia, UCAM Murcia, 1, 0
+Mallorca, Elche, 1, 0
+Reus, Zaragoza, 1, 0
+Almeria, Valladolid, 0, 3
+Mirandes, Sevilla At., 0, 1
+Cadiz, Gimnastic, 0, 0
+Getafe, Cordoba, 2, 0
+Tenerife, Lugo, 2, 1
+Zaragoza, Cadiz, 1, 1
+Sevilla At., Getafe, 2, 1
+Gimnastic, Real Oviedo, 2, 2
+Alcorcon, Rayo Vallecano, 2, 0
+Cordoba, Reus, 1, 0
+Almeria, Numancia, 2, 0
+Levante, Girona, 2, 1
+Huesca, Tenerife, 2, 2
+Elche, Mirandes, 0, 1
+Valladolid, Mallorca, 2, 1
+Lugo, UCAM Murcia, 0, 0
+Getafe, Elche, 2, 0
+Rayo Vallecano, Gimnastic, 2, 0
+Cadiz, Cordoba, 1, 1
+Real Oviedo, Zaragoza, 0, 0
+Girona, Alcorcon, 0, 0
+Tenerife, Levante, 0, 0
+UCAM Murcia, Huesca, 3, 1
+Reus, Sevilla At., 2, 1
+Mallorca, Almeria, 1, 0
+Numancia, Lugo, 0, 1
+Mirandes, Valladolid, 2, 2
+Levante, UCAM Murcia, 3, 1
+Sevilla At., Cadiz, 3, 3
+Valladolid, Getafe, 1, 0
+Almeria, Mirandes, 2, 0
+Huesca, Lugo, 1, 0
+Cordoba, Real Oviedo, 4, 2
+Gimnastic, Girona, 3, 1
+Elche, Reus, 1, 1
+Mallorca, Numancia, 0, 0
+Zaragoza, Rayo Vallecano, 1, 1
+Alcorcon, Tenerife, 1, 3
+Lugo, Levante, 1, 0
+Huesca, Numancia, 0, 0
+Real Oviedo, Sevilla At., 1, 0
+Tenerife, Gimnastic, 0, 1
+Getafe, Almeria, 4, 0
+UCAM Murcia, Alcorcon, 0, 1
+Reus, Valladolid, 2, 0
+Cadiz, Elche, 2, 1
+Mirandes, Mallorca, 2, 2
+Girona, Zaragoza, 0, 0
+Rayo Vallecano, Cordoba, 1, 2
+Cordoba, Girona, 2, 1
+Elche, Real Oviedo, 0, 2
+Valladolid, Cadiz, 1, 0
+Alcorcon, Lugo, 3, 0
+Almeria, Reus, 1, 0
+Gimnastic, UCAM Murcia, 1, 0
+Mallorca, Getafe, 3, 3
+Levante, Huesca, 1, 2
+Sevilla At., Rayo Vallecano, 1, 2
+Zaragoza, Tenerife, 1, 2
+Numancia, Mirandes, 0, 2
