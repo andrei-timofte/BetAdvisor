@@ -15,6 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC  # available si
 from selenium.webdriver.support.ui import WebDriverWait  # available since 2.4.0
 
 from db_helper import db_helper as db
+from history import db_history as history
 
 
 def get_results_folder():
@@ -67,6 +68,7 @@ alias_home = None
 alias_away = None
 combo_box_1 = None
 combo_box_2 = None
+ignored_compet = None
 
 
 def alias_ok():
@@ -92,6 +94,17 @@ def alias_cancel():
     main_window.destroy()
 
 
+def alias_ignore():
+    global ignored_compet
+    global not_interested_competitions
+    not_interested_competitions.append(ignored_compet)
+    with open('not_interested_competitions.txt', 'wt') as f:
+        for l in not_interested_competitions:
+            f.write(l.lower().strip() + '\n')
+    ignored_compet = None
+    main_window.destroy()
+
+
 def get_team_alias_from_user(lista_ech, echipa_home, echipa_away, compet):
     """
     Aici ar trebui sa iau si echipa de pe flashscore sa incerc sa fac un match cu o echipa din lista.
@@ -100,18 +113,15 @@ def get_team_alias_from_user(lista_ech, echipa_home, echipa_away, compet):
     :param lista_ech:
     :return:
     """
-    # n = 1
-    # for t in lista_ech:
-    #     print("{}. {}".format(n, t))
-    #     n += 1
     global main_window
     global alias_home
     global alias_away
     global combo_box_1
     global combo_box_2
+    global ignored_compet
+    global pattern
 
-    # alias_home = None
-    # alias_away = None
+    ignored_compet = compet
 
     main_window = Tk()
     main_window.title('Aliasuri {} si {}'.format(echipa_home, echipa_away))
@@ -129,8 +139,22 @@ def get_team_alias_from_user(lista_ech, echipa_home, echipa_away, compet):
     combo_box_2.set(lista_ech[0])
     if echipa_home in lista_ech:
         combo_box_1.set(echipa_home)
+    else:
+        e_home = pattern.sub('', echipa_home)
+        for ec in lista_ech:
+            if e_home.lower() in pattern.sub('', ec):
+                combo_box_1.set(ec)
+                break
+
     if echipa_away in lista_ech:
         combo_box_2.set(echipa_away)
+    else:
+        e_home = pattern.sub('', echipa_home)
+        for ec in lista_ech:
+            if e_home.lower() in pattern.sub('', ec):
+                combo_box_1.set(ec)
+                break
+
     if alias_home is not None and alias_home in lista_ech:
         combo_box_1.set(alias_home)
     if alias_away is not None and alias_away in lista_ech:
@@ -138,20 +162,8 @@ def get_team_alias_from_user(lista_ech, echipa_home, echipa_away, compet):
 
     Button(main_window, text='OK', command=alias_ok).grid(column=1, row=3)
     Button(main_window, text='Cancel', command=alias_cancel).grid(column=3, row=3)
+    Button(main_window, text='Ignore this competition', command=alias_ignore).grid(column=4, row=3)
     mainloop()
-
-    # selected = input("Introduceti numarul corespunzator pentru a alege aliasul sau unul care nu se regaseste in "
-    #                  "lista pentru a sari peste aceasta echipa!\n"
-    #                  "Daca constatati ca nu corespunde competitia, opriti scriptul si stergeti competitia din "
-    #                  "competitions_aliases.json apoi rulati iar scriptul pentru actualizare!\n Aliasurile echipelor se "
-    #                  "definesc de oricate ori superbet modifica numele echipelor :( :")
-    # try:
-    #     selected = int(selected)
-    # except ValueError:
-    #     return None
-    # if selected < 1 or selected > len(lista_ech):
-    #     return None
-    # return lista_ech[selected - 1]
 
 
 pattern = re.compile('[\W_]+', re.UNICODE)
@@ -178,7 +190,6 @@ def load_matches():
         exit(1)
     meciuri_json = fis
     results_folder = os.path.dirname(os.path.realpath(fis))
-    # print(sys.argv)
     main_window.destroy()
 
 competitions_aliases = {}
@@ -192,17 +203,6 @@ def get_results(meciuri_jso):
     global not_interested_competitions
     global alias_home
     global alias_away
-    # if len(sys.argv) < 2:
-    #     main_window = Tk()
-    #     main_window.title('Calea catre meciuri.json')
-    #     Label(main_window, text='Introduceti calea catre fisierul "meciuri.json" pe care trebuie sa-l filtrez:').grid(row=0, column=0)
-    #     edit_box_1 = Entry(main_window)
-    #     edit_box_1.grid(row=0, column=1)
-    #     button_1 = Button(main_window, text='OK', command=load_matches)
-    #     button_1.grid(row=1)
-    #     mainloop()
-    # else:
-    # meciuri_json = sys.argv[1]
     results_folder = os.path.dirname(os.path.realpath(meciuri_jso))
 
     if meciuri_jso is None or not os.path.isfile(meciuri_jso):
@@ -307,177 +307,218 @@ def get_results(meciuri_jso):
 
     print("Am terminat de actualizat competitiile!\nIncepem cu echipele!")
 
-    gather = 'Y'
-    if 'N' in gather:
-        print('Nu culeg rezultatele curente pentru competitiile in curs.')
-    elif 'Y' in gather.upper():
+    # gather = 'N'
+    # if 'N' in gather:
+    #     print('Nu culeg rezultatele curente pentru competitiile in curs.')
+    # elif 'Y' in gather.upper():
+
+    if not os.path.isfile(os.path.join(results_folder, 'archive_final.json')):
+        total_competitii = len(current_competitions)
+        curr_comp = 0
         for competitie in current_competitions:
+            curr_comp += 1
+            print("Competitie {}/{}".format(curr_comp, total_competitii))
             if competitie not in teams_aliases.keys():
                 teams_aliases[competitie] = {}
-            print("Adun rezultatele pentru competitia {}".format(competitie))
-            # Incerc sa iau echipele din aceasta competitie
+        #         print("Adun rezultatele pentru competitia {}".format(competitie))
+        #         # Incerc sa iau echipele din aceasta competitie
             print("Incerc sa iau echipele din aceasta competitie")
-            try:
-                driver.get(competitions_aliases[competitie]["Link"] + 'echipe/')
-                wait_for_elem_by_css('#tournament-page-participants > table:nth-child(1) > tbody:nth-child(3)')
-                tabel_echipe = driver.find_element_by_css_selector('#tournament-page-participants > table:nth-child(1) > tbody:nth-child(3)')
-                lista_elemente_echipe = tabel_echipe.find_elements(By.CSS_SELECTOR, "td[class='tp']")
-                for team in lista_elemente_echipe:
-                    ht = str(team.text).replace("'", "`")
-                    if ht not in teams_aliases[competitie].keys():
-                        teams_aliases[competitie][ht] = [ht]
-                    else:
-                        if ht not in teams_aliases[competitie][ht]:
-                            teams_aliases[competitie][ht].append(ht)
-                    print(ht)
-            except Exception as e:
-                print('Exceptie la incercarea de a lua echipele ({})'.format(e.args))
-            driver.get(competitions_aliases[competitie]["Link"] + 'rezultate/')
-            wait_for_elem_by_css('table.soccer > tbody:nth-child(3)')  # tabelul cu rezultate
-            more_games = True
-            while more_games:
-                more_games = False
+            count = 0
+            ex = Exception()
+            while count < 3:
                 try:
-                    more_results = driver.find_element_by_css_selector('#tournament-page-results-more > tbody > tr > td > a')
-                    driver.execute_script('arguments[0].scrollIntoView();', more_results)
-                    time.sleep(0.5)
-                    more_results.click()
-                    time.sleep(3)
-                    more_games = True
-                except:
-                    pass
-
-            tabele_rezultate = driver.find_elements(By.CSS_SELECTOR, "table[class='soccer'")
-            rezultate_elements_list = []
-            for tabel in range(len(tabele_rezultate)):
-                rezultate_tabel = tabele_rezultate[tabel].find_element_by_css_selector('tbody')
-                rezultate_meciuri = rezultate_tabel.find_elements(By.CSS_SELECTOR, "tr")
-                for i in range(len(rezultate_meciuri)):
-                    if 'event_round' in rezultate_meciuri[i].get_attribute('class'):
-                        if 'runda' in str(rezultate_meciuri[i].text).lower():
-                            rezultate_elements_list.append(rezultate_meciuri[i].find_element(By.TAG_NAME, 'td').text)
+                    driver.get(competitions_aliases[competitie]["Link"] + 'echipe/')
+                    wait_for_elem_by_css('#tournament-page-participants > table:nth-child(1) > tbody:nth-child(3)')
+                    tabel_echipe = driver.find_element_by_css_selector('#tournament-page-participants > table:nth-child(1) > tbody:nth-child(3)')
+                    lista_elemente_echipe = tabel_echipe.find_elements(By.CSS_SELECTOR, "td[class='tp']")
+                    for team in lista_elemente_echipe:
+                        ht = str(team.text).replace("'", "`")
+                        if ht not in teams_aliases[competitie].keys():
+                            teams_aliases[competitie][ht] = [ht]
                         else:
-                            rezultate_elements_list.append('Runda X')
-                    else:
-                        rezultate_elements_list.append(rezultate_meciuri[i].get_attribute('id').split('_')[-1])
-
-            runda = 0
-            for entry in range(len(rezultate_elements_list) - 1, -1, -1):
-                if 'runda' in rezultate_elements_list[entry].lower():
-                    try:
-                        runda = int(rezultate_elements_list[entry].split()[-1])
-                    except:
-                        runda += 1
-                        rezultate_elements_list[entry] = 'Runda ' + str(runda)
-
-            runda = 0
-            for r in rezultate_elements_list:
-                if 'runda' in r.lower():
-                    runda = int(r.split()[-1])
-                else:
-                    if not db.match_has_results(r):
-                        driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
-                        wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
-                        wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
-                        home_team = ''
-                        while len(home_team) == 0:
-                            home_team = driver.find_element_by_css_selector(
-                                '.tname-home > span:nth-child(1) > a:nth-child(2)').text
-                            if len(home_team) == 0:
-                                time.sleep(.5)
-                        away_team = ''
-                        while len(away_team) == 0:
-                            away_team = driver.find_element_by_css_selector(
-                                '.tname-away > span:nth-child(1) > a:nth-child(1)').text
-                            if len(away_team) == 0:
-                                time.sleep(.5)
-                        home_team = home_team.replace("'", "`")
-                        away_team = away_team.replace("'", "`")
-                        if home_team not in teams_aliases[competitie].keys():
-                            teams_aliases[competitie][home_team] = [home_team]
-                        else:
-                            if home_team not in teams_aliases[competitie][home_team]:
-                                teams_aliases[competitie][home_team].append(home_team)
-
-                        if away_team not in teams_aliases[competitie].keys():
-                            teams_aliases[competitie][away_team] = [away_team]
-                        else:
-                            if away_team not in teams_aliases[competitie][away_team]:
-                                teams_aliases[competitie][away_team].append(away_team)
-                        skip = False
-                        try:
-                            results_table = driver.find_element_by_css_selector('#parts > tbody')
-                            rep_elems = results_table.find_elements(By.CSS_SELECTOR, "td[class='h-part'")
-                            if len(rep_elems) < 2:
-                                print("Meciul {} nu are rezultate pentru ambele reprize!")
-                                skip = True
-                            txts = []
-                            for rep in rep_elems:
-                                txts.append(rep.text.lower())
-                            if 'repriza 1' not in txts or 'repriza 2' not in txts:
-                                print("Meciul {} nu are rezultate pentru ambele reprize!".format(r))
-                                skip = True
-                        except:
-                            skip = True
-                            print('Exceptie la gasirea textelor pentru reprize!')
-                        fh_ht_score = -1
-                        fh_at_score = -1
-                        sh_ht_score = -1
-                        sh_at_score = -1
-                        try:
-                            fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
-                        except:
-                            pass
-                        try:
-                            fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
-                        except:
-                            pass
-                        try:
-                            sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
-                        except:
-                            pass
-                        try:
-                            sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
-                        except:
-                            pass
-
-                        if not skip:
-                            if fh_ht_score == -1 or fh_at_score == -1 or sh_ht_score == -1 or sh_at_score == -1:
-                                try:
-                                    info = driver.find_element_by_css_selector('#info-row > td > span > span.text')
-                                    # Am gasit informatii despre joc cum ca s-ar fi anulat sau amanat. Nu-l mai iau in considerare
-                                    skip = True
-                                except:
-                                    if fh_ht_score == -1:
-                                        print('Nu am putut lua scorul pentru {} pentru prima repriza a meciului {} - {} id={} '
-                                              'si nu am gasit info! Pun 0!'.format(home_team, home_team, away_team, r))
-                                        fh_ht_score = 0
-                                    if fh_at_score == -1:
-                                        print('Nu am putut lua scorul pentru {} pentru prima repriza a meciului {} - {} id={} '
-                                              'si nu am gasit info! Pun 0!'.format(away_team, home_team, away_team, r))
-                                        fh_at_score = 0
-                                    if sh_ht_score == -1:
-                                        print('Nu am putut lua scorul pentru {} pentru a doua repriza a meciului {} - {} id={} '
-                                              'si nu am gasit info! Pun 0!'.format(home_team, home_team, away_team, r))
-                                        sh_ht_score = 0
-                                    if sh_at_score == -1:
-                                        print('Nu am putut lua scorul pentru {} pentru a doua repriza a meciului {} - {} id={} '
-                                              'si nu am gasit info! Pun 0!'.format(away_team, home_team, away_team, r))
-                                        sh_at_score = 0
-                                    pass
-                        if skip:
-                            print('Sar peste meciul {} - {} id={}. Nu am putut lua scorul pentru '
-                                  'ambele reprize!'.format(home_team, away_team, r))
-                        else:
-                            db.add_match(competitie,
-                                         runda,
-                                         r,
-                                         home_team,
-                                         away_team,
-                                         fh_ht_score,
-                                         fh_at_score,
-                                         sh_ht_score,
-                                         sh_at_score)
+                            if ht not in teams_aliases[competitie][ht]:
+                                teams_aliases[competitie][ht].append(ht)
+                        print(ht)
+                    break
+                except Exception as e:
+                    ex = e
+                    print('Exceptie la incercarea de a lua echipele ({})'.format(e.args))
+                    count += 1
+                    driver.refresh()
+                    time.sleep(5)
+            if count == 3:
+                raise ex
+    #
+    #         count = 0
+    #         ex = Exception()
+    #         while count < 3:
+    #             try:
+    #                 driver.get(competitions_aliases[competitie]["Link"] + 'rezultate/')
+    #                 break
+    #             except Exception as e:
+    #                 ex = e
+    #                 print('Exceptie la incercarea de a lua rezultatele ({})'.format(e.args))
+    #                 count += 1
+    #         if count == 3:
+    #             raise ex
+    #
+    #         wait_for_elem_by_css('table.soccer > tbody:nth-child(3)')  # tabelul cu rezultate
+    #         more_games = True
+    #         while more_games:
+    #             more_games = False
+    #             try:
+    #                 more_results = driver.find_element_by_css_selector('#tournament-page-results-more > tbody > tr > td > a')
+    #                 driver.execute_script('arguments[0].scrollIntoView();', more_results)
+    #                 time.sleep(0.5)
+    #                 more_results.click()
+    #                 time.sleep(3)
+    #                 more_games = True
+    #             except:
+    #                 pass
+    #
+    #         tabele_rezultate = driver.find_elements(By.CSS_SELECTOR, "table[class='soccer'")
+    #         rezultate_elements_list = []
+    #         for tabel in range(len(tabele_rezultate)):
+    #             rezultate_tabel = tabele_rezultate[tabel].find_element_by_css_selector('tbody')
+    #             rezultate_meciuri = rezultate_tabel.find_elements(By.CSS_SELECTOR, "tr")
+    #             for i in range(len(rezultate_meciuri)):
+    #                 if 'event_round' in rezultate_meciuri[i].get_attribute('class'):
+    #                     if 'runda' in str(rezultate_meciuri[i].text).lower():
+    #                         rezultate_elements_list.append(rezultate_meciuri[i].find_element(By.TAG_NAME, 'td').text)
+    #                     else:
+    #                         rezultate_elements_list.append('Runda X')
+    #                 else:
+    #                     rezultate_elements_list.append(rezultate_meciuri[i].get_attribute('id').split('_')[-1])
+    #
+    #         runda = 0
+    #         for entry in range(len(rezultate_elements_list) - 1, -1, -1):
+    #             if 'runda' in rezultate_elements_list[entry].lower():
+    #                 try:
+    #                     runda = int(rezultate_elements_list[entry].split()[-1])
+    #                 except:
+    #                     runda += 1
+    #                     rezultate_elements_list[entry] = 'Runda ' + str(runda)
+    #
+    #         runda = 0
+    #         for r in rezultate_elements_list:
+    #             if 'runda' in r.lower():
+    #                 runda = int(r.split()[-1])
+    #             else:
+    #                 if not db.match_has_results(r):
+    #                     count = 0
+    #                     ex = Exception()
+    #                     while count < 3:
+    #                         try:
+    #                             driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
+    #                             break
+    #                         except Exception as e:
+    #                             ex = e
+    #                             print('Exceptie la incercarea de a lua rezultatele 2 ({})'.format(e.args))
+    #                             count += 1
+    #                     if count == 3:
+    #                         raise ex
+    #
+    #                     wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
+    #                     wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
+    #                     home_team = ''
+    #                     while len(home_team) == 0:
+    #                         home_team = driver.find_element_by_css_selector(
+    #                             '.tname-home > span:nth-child(1) > a:nth-child(2)').text
+    #                         if len(home_team) == 0:
+    #                             time.sleep(.5)
+    #                     away_team = ''
+    #                     while len(away_team) == 0:
+    #                         away_team = driver.find_element_by_css_selector(
+    #                             '.tname-away > span:nth-child(1) > a:nth-child(1)').text
+    #                         if len(away_team) == 0:
+    #                             time.sleep(.5)
+    #                     home_team = home_team.replace("'", "`")
+    #                     away_team = away_team.replace("'", "`")
+    #                     if home_team not in teams_aliases[competitie].keys():
+    #                         teams_aliases[competitie][home_team] = [home_team]
+    #                     else:
+    #                         if home_team not in teams_aliases[competitie][home_team]:
+    #                             teams_aliases[competitie][home_team].append(home_team)
+    #
+    #                     if away_team not in teams_aliases[competitie].keys():
+    #                         teams_aliases[competitie][away_team] = [away_team]
+    #                     else:
+    #                         if away_team not in teams_aliases[competitie][away_team]:
+    #                             teams_aliases[competitie][away_team].append(away_team)
+    #                     skip = False
+    #                     try:
+    #                         results_table = driver.find_element_by_css_selector('#parts > tbody')
+    #                         rep_elems = results_table.find_elements(By.CSS_SELECTOR, "td[class='h-part'")
+    #                         if len(rep_elems) < 2:
+    #                             print("Meciul {} nu are rezultate pentru ambele reprize!")
+    #                             skip = True
+    #                         txts = []
+    #                         for rep in rep_elems:
+    #                             txts.append(rep.text.lower())
+    #                         if 'repriza 1' not in txts or 'repriza 2' not in txts:
+    #                             print("Meciul {} nu are rezultate pentru ambele reprize!".format(r))
+    #                             skip = True
+    #                     except:
+    #                         skip = True
+    #                         print('Exceptie la gasirea textelor pentru reprize!')
+    #                     fh_ht_score = -1
+    #                     fh_at_score = -1
+    #                     sh_ht_score = -1
+    #                     sh_at_score = -1
+    #                     try:
+    #                         fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
+    #                     except:
+    #                         pass
+    #                     try:
+    #                         fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
+    #                     except:
+    #                         pass
+    #                     try:
+    #                         sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
+    #                     except:
+    #                         pass
+    #                     try:
+    #                         sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
+    #                     except:
+    #                         pass
+    #
+    #                     if not skip:
+    #                         if fh_ht_score == -1 or fh_at_score == -1 or sh_ht_score == -1 or sh_at_score == -1:
+    #                             try:
+    #                                 info = driver.find_element_by_css_selector('#info-row > td > span > span.text')
+    #                                 # Am gasit informatii despre joc cum ca s-ar fi anulat sau amanat. Nu-l mai iau in considerare
+    #                                 skip = True
+    #                             except:
+    #                                 if fh_ht_score == -1:
+    #                                     print('Nu am putut lua scorul pentru {} pentru prima repriza a meciului {} - {} id={} '
+    #                                           'si nu am gasit info! Pun 0!'.format(home_team, home_team, away_team, r))
+    #                                     fh_ht_score = 0
+    #                                 if fh_at_score == -1:
+    #                                     print('Nu am putut lua scorul pentru {} pentru prima repriza a meciului {} - {} id={} '
+    #                                           'si nu am gasit info! Pun 0!'.format(away_team, home_team, away_team, r))
+    #                                     fh_at_score = 0
+    #                                 if sh_ht_score == -1:
+    #                                     print('Nu am putut lua scorul pentru {} pentru a doua repriza a meciului {} - {} id={} '
+    #                                           'si nu am gasit info! Pun 0!'.format(home_team, home_team, away_team, r))
+    #                                     sh_ht_score = 0
+    #                                 if sh_at_score == -1:
+    #                                     print('Nu am putut lua scorul pentru {} pentru a doua repriza a meciului {} - {} id={} '
+    #                                           'si nu am gasit info! Pun 0!'.format(away_team, home_team, away_team, r))
+    #                                     sh_at_score = 0
+    #                                 pass
+    #                     if skip:
+    #                         print('Sar peste meciul {} - {} id={}. Nu am putut lua scorul pentru '
+    #                               'ambele reprize!'.format(home_team, away_team, r))
+    #                     else:
+    #                         db.add_match(competitie,
+    #                                      runda,
+    #                                      r,
+    #                                      home_team,
+    #                                      away_team,
+    #                                      fh_ht_score,
+    #                                      fh_at_score,
+    #                                      sh_ht_score,
+    #                                      sh_at_score)
 
     # driver.quit()
 
@@ -507,10 +548,6 @@ def get_results(meciuri_jso):
                 lista_echipe = db.get_competition_teams(exists)
                 # Adaug la lista echipelor si acele echipe care nu figureaza in baza de date pentru ca nu au nici un
                 # meci jucat pana in prezent. Acele echipe au fost culese la adunarea rezultatelor
-                #
-                # if 'danemarca' in competitie.lower():
-                #     print('Opa!')
-                # competition_defined()
 
                 if exists in teams_aliases.keys() and len(teams_aliases[exists].keys()) > 0:
                     lista_echipe.extend(teams_aliases[exists].keys())
@@ -550,7 +587,7 @@ def get_results(meciuri_jso):
             else:
                 # Nu am competitia definita
                 print('Competitia {} nu este definita! Fie s-a sarit peste ea la actualizare fie s-a dorit oprirea '
-                      'actualizarilor! Sar si aici peste ea!')
+                      'actualizarilor! Sar si aici peste ea!'.format(competitie))
     if len(teams_aliases.keys()) > 0:
         with open('teams_aliases.json', 'wt') as f:
             json.dump(teams_aliases, f)
@@ -585,7 +622,7 @@ def get_results(meciuri_jso):
                     meciuri_soccerstats[exists][m] = {}
                     meciuri_soccerstats[exists][m]['Home'] = echipa_home
                     meciuri_soccerstats[exists][m]['Away'] = echipa_away
-                    meciuri_soccerstats[exists][m]['Cote'] = meciuri[k][m]['Cote']
+                    # meciuri_soccerstats[exists][m]['Cote'] = meciuri[k][m]['Cote']
 
     with open(os.path.join(results_folder, 'meciuri_soccerstats.json'), 'wt') as f:
         json.dump(meciuri_soccerstats, f)
@@ -594,61 +631,106 @@ def get_results(meciuri_jso):
         with open('teams_aliases.json', 'rt') as f:
             teams_aliases = json.load(f)
     archive = {}
+    if os.path.isfile(os.path.join(results_folder, 'archive_partial.json')):
+        with open(os.path.join(results_folder, 'archive_partial.json'), 'rt') as f:
+            archive = json.load(f)
+    else:
+        for competitie in meciuri.keys():
+            if (competitie.strip().lower() + '\n') not in not_interested_competitions and \
+                            competitie.strip().lower() not in not_interested_competitions:
+                exists = competition_defined(competitie)
+                # Exists este False daca nu am gasit competitia si str (numele competitiei de pe soccerstats daca am gasit-o)
+                # Avand in vedere ca tocmai am parcurs competitiile, exists == False este posibil doar daca am oprit parcurgerea
+                # competitiilor sau am dat skip la asta
+                if isinstance(exists, str):
+                    print(competitie)
+                    # archive[exists] = {}
+                    link = competitions_aliases[exists]['Link'] + 'meciuri/'
 
-    for competitie in meciuri.keys():
-        if (competitie.strip().lower() + '\n') not in not_interested_competitions and \
-                        competitie.strip().lower() not in not_interested_competitions:
-            exists = competition_defined(competitie)
-            # Exists este False daca nu am gasit competitia si str (numele competitiei de pe soccerstats daca am gasit-o)
-            # Avand in vedere ca tocmai am parcurs competitiile, exists == False este posibil doar daca am oprit parcurgerea
-            # competitiilor sau am dat skip la asta
-            if isinstance(exists, str):
-                print(competitie)
-                # archive[exists] = {}
-                link = competitions_aliases[exists]['Link'] + 'meciuri/'
-                driver.get(link)
-                wait_for_elem_by_css('table.soccer > tbody:nth-child(3)')
-                try:
-                    tabel_meciuri = driver.find_element_by_css_selector('table.soccer > tbody:nth-child(3)')
-                except:
-                    continue
-                meciuri_viitoare = tabel_meciuri.find_elements(By.CSS_SELECTOR, 'tr')
-                max_meciuri = len(meciuri_viitoare)
-                for tr_meci in range(min(25, max_meciuri)):
-                    tr_meci = meciuri_viitoare[tr_meci]
-                    for m in meciuri[competitie]:
-                        echipa_home = get_team_name_from_alias(exists, meciuri[competitie][m]['Home'])
-                        echipa_away = get_team_name_from_alias(exists, meciuri[competitie][m]['Away'])
+                    count = 0
+                    ex = Exception()
+                    while count < 3:
                         try:
-                            id = tr_meci.get_attribute('id')
-                            id = id.split('_')[-1]
-                            home_team = tr_meci.find_element(By.CSS_SELECTOR, "span[class='padr'").text
-                            away_team = tr_meci.find_element(By.CSS_SELECTOR, "span[class='padl'").text
-                            # print(home_team + ' - ' + echipa_home)
-                            # print(away_team + ' - ' + echipa_away)
-                            if (home_team.strip() in echipa_home) and (away_team.strip() in echipa_away):
-                                if exists not in archive.keys():
-                                    archive[exists] = {}
-                                archive[exists][m] = {}
-                                archive[exists][m]['Home'] = echipa_home
-                                archive[exists][m]['Away'] = echipa_away
-                                archive[exists][m]['MatchID'] = id
-                                print(archive[exists][m])
-                        except:
+                            driver.get(link)
                             break
-    print(archive)
-    with open(os.path.join(results_folder, 'archive_partial.json'), 'wt') as f:
-        json.dump(archive, f)
+                        except Exception as e:
+                            ex = e
+                            print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                            count += 1
+                            driver.refresh()
+                            time.sleep(5)
 
-    # with open(os.path.join(results_folder, 'archive_partial.json'), 'rt') as f:
-    #     archive = json.load(f)
+                    if count == 3:
+                        raise ex
 
-    final_archive = copy.deepcopy(archive)
+                    wait_for_elem_by_css('table.soccer > tbody:nth-child(3)')
+                    try:
+                        tabel_meciuri = driver.find_element_by_css_selector('table.soccer > tbody:nth-child(3)')
+                    except:
+                        continue
+                    meciuri_viitoare = tabel_meciuri.find_elements(By.CSS_SELECTOR, 'tr')
+                    max_meciuri = len(meciuri_viitoare)
+                    for tr_meci in range(min(10, max_meciuri)):
+                        tr_meci = meciuri_viitoare[tr_meci]
+                        for m in meciuri[competitie]:
+                            echipa_home = get_team_name_from_alias(exists, meciuri[competitie][m]['Home'])
+                            echipa_away = get_team_name_from_alias(exists, meciuri[competitie][m]['Away'])
+                            try:
+                                id = tr_meci.get_attribute('id')
+                                id = id.split('_')[-1]
+                                home_team = tr_meci.find_element(By.CSS_SELECTOR, "span[class='padr'").text
+                                away_team = tr_meci.find_element(By.CSS_SELECTOR, "span[class='padl'").text
+                                # print(home_team + ' - ' + echipa_home)
+                                # print(away_team + ' - ' + echipa_away)
+                                if (home_team.strip() in echipa_home) and (away_team.strip() in echipa_away):
+                                    if exists not in archive.keys():
+                                        archive[exists] = {}
+                                    archive[exists][m] = {}
+                                    archive[exists][m]['Home'] = echipa_home
+                                    archive[exists][m]['Away'] = echipa_away
+                                    archive[exists][m]['MatchID'] = id
+                                    print(archive[exists][m])
+                            except:
+                                pass
+        print(archive)
+        with open(os.path.join(results_folder, 'archive_partial.json'), 'wt') as f:
+            json.dump(archive, f)
 
-    for competitie in archive.keys():
+    total_meciuri = 0
+    for _, v in archive.items():
+        total_meciuri += len(v.keys())
+
+    if os.path.isfile(os.path.join(results_folder, 'archive_final.json')):
+        with open(os.path.join(results_folder, 'archive_final.json'), 'rt') as f:
+            final_archive = json.load(f)
+    else:
+        final_archive = copy.deepcopy(archive)
+
+    curr_meci = 0
+    while len(archive.keys()):
+        competitie = list(archive.keys())[0]
+    # for competitie in archive.keys():
         print('Archive - {}'.format(competitie))
-        for m in archive[competitie].keys():
-            driver.get('http://www.flashscore.ro/meci/{}/#h2h;home'.format(archive[competitie][m]['MatchID']))
+        while len(archive[competitie].keys()):
+            m = list(archive[competitie].keys())[0]
+        # for m in archive[competitie].keys():
+            curr_meci += 1
+            print("Meci {}/{}".format(curr_meci, total_meciuri))
+            count = 0
+            ex = Exception()
+            while count < 3:
+                try:
+                    driver.get('http://www.flashscore.ro/meci/{}/#h2h;home'.format(archive[competitie][m]['MatchID']))
+                    break
+                except Exception as e:
+                    ex = e
+                    print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                    count += 1
+                    driver.refresh()
+                    time.sleep(5)
+
+            if count == 3:
+                raise ex
             wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
             wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
             home_team = ''
@@ -668,14 +750,28 @@ def get_results(meciuri_jso):
             tabel_rezultate_home = driver.find_element(By.CSS_SELECTOR, "#tab-h2h-home > table:nth-child(1) > tbody:nth-child(3)")
             rezultate_home = tabel_rezultate_home.find_elements(By.CSS_SELECTOR, 'tr[class]')
             iduri_rezultate_home = []
-            for rez in range(len(rezultate_home)):
+            for rez in range(min(10, len(rezultate_home))):
                 if 'highlight' in rezultate_home[rez].get_attribute('class'):
                     id = rezultate_home[rez].get_attribute('onclick').split('(')[-1].split("'")[1].split('_')[-1]
                     iduri_rezultate_home.append(id)
             final_archive[competitie][m]['IDuri_Home'] = copy.deepcopy(iduri_rezultate_home)
 
             print('Istoric away {} - {}'.format(home_team, away_team))
-            driver.get('http://www.flashscore.ro/meci/{}/#h2h;away'.format(archive[competitie][m]['MatchID']))
+            count = 0
+            ex = Exception()
+            while count < 3:
+                try:
+                    driver.get('http://www.flashscore.ro/meci/{}/#h2h;away'.format(archive[competitie][m]['MatchID']))
+                    break
+                except Exception as e:
+                    ex = e
+                    print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                    count += 1
+                    driver.refresh()
+                    time.sleep(5)
+
+            if count == 3:
+                raise ex
             wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
             wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
             home_team = ''
@@ -694,7 +790,7 @@ def get_results(meciuri_jso):
             tabel_rezultate_away = driver.find_element(By.CSS_SELECTOR, "table.h2h_away:nth-child(1) > tbody:nth-child(3)")
             rezultate_away = tabel_rezultate_away.find_elements(By.CSS_SELECTOR, 'tr[class]')
             iduri_rezultate_away = []
-            for rez in range(len(rezultate_away)):
+            for rez in range(min(10, len(rezultate_away))):
                 if 'highlight' in rezultate_away[rez].get_attribute('class'):
                     id = rezultate_away[rez].get_attribute('onclick').split('(')[-1].split("'")[1].split('_')[-1]
                     iduri_rezultate_away.append(id)
@@ -705,7 +801,7 @@ def get_results(meciuri_jso):
             tabel_rezultate_h2h = driver.find_element(By.CSS_SELECTOR, "#tab-h2h-away > table:nth-child(2) > tbody:nth-child(3)")
             rezultate_h2h = tabel_rezultate_h2h.find_elements(By.CSS_SELECTOR, 'tr[class]')
             iduri_rezultate_h2h = []
-            for rez in range(len(rezultate_h2h)):
+            for rez in range(min(10, len(rezultate_h2h))):
                 if 'highlight' in rezultate_h2h[rez].get_attribute('class'):
                     id = rezultate_h2h[rez].get_attribute('onclick').split('(')[-1].split("'")[1].split('_')[-1]
                     iduri_rezultate_h2h.append(id)
@@ -714,160 +810,229 @@ def get_results(meciuri_jso):
             # Acum iau rezultatul pentru aceste meciuri din arhiva
             print('Meciuri home_team...')
             for r in final_archive[competitie][m]['IDuri_Home']:
-                driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
-                wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
-                wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
-                home_team = ''
-                while len(home_team) == 0:
-                    home_team = driver.find_element_by_css_selector(
-                        '.tname-home > span:nth-child(1) > a:nth-child(2)').text
-                    if len(home_team) == 0:
-                        time.sleep(.5)
-                away_team = ''
-                while len(away_team) == 0:
-                    away_team = driver.find_element_by_css_selector(
-                        '.tname-away > span:nth-child(1) > a:nth-child(1)').text
-                    if len(away_team) == 0:
-                        time.sleep(.5)
-                home_team = home_team.replace("'", "`")
-                away_team = away_team.replace("'", "`")
-                print('Istoric home {} - {}'.format(home_team, away_team))
-                fh_ht_score = -1
-                fh_at_score = -1
-                sh_ht_score = -1
-                sh_at_score = -1
-                try:
-                    results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
-                except:
-                    continue
-                try:
-                    fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
-                except:
-                    pass
-                try:
-                    fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
-                except:
-                    pass
-                try:
-                    sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
-                except:
-                    pass
-                try:
-                    sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
-                except:
-                    pass
-                if 'Rezultate_Home' not in final_archive[competitie][m].keys():
-                    final_archive[competitie][m]['Rezultate_Home'] = []
-                final_archive[competitie][m]['Rezultate_Home'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                if history.get_match(r) is None:
+                    count = 0
+                    ex = Exception()
+                    while count < 3:
+                        try:
+                            driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
+                            break
+                        except Exception as e:
+                            ex = e
+                            print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                            count += 1
+                            driver.refresh()
+                            time.sleep(5)
 
+                    if count == 3:
+                        raise ex
+                    wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
+                    wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
+                    home_team = ''
+                    while len(home_team) == 0:
+                        home_team = driver.find_element_by_css_selector(
+                            '.tname-home > span:nth-child(1) > a:nth-child(2)').text
+                        if len(home_team) == 0:
+                            time.sleep(.5)
+                    away_team = ''
+                    while len(away_team) == 0:
+                        away_team = driver.find_element_by_css_selector(
+                            '.tname-away > span:nth-child(1) > a:nth-child(1)').text
+                        if len(away_team) == 0:
+                            time.sleep(.5)
+                    home_team = home_team.replace("'", "`")
+                    away_team = away_team.replace("'", "`")
+                    print('Istoric home {} - {}'.format(home_team, away_team))
+                    fh_ht_score = -1
+                    fh_at_score = -1
+                    sh_ht_score = -1
+                    sh_at_score = -1
+                    try:
+                        results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
+                    except:
+                        continue
+                    try:
+                        fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
+                    except:
+                        pass
+                    try:
+                        fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
+                    except:
+                        pass
+                    try:
+                        sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
+                    except:
+                        pass
+                    try:
+                        sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
+                    except:
+                        pass
+                    # if 'Rezultate_Home' not in final_archive[competitie][m].keys():
+                    #     final_archive[competitie][m]['Rezultate_Home'] = []
+                    # final_archive[competitie][m]['Rezultate_Home'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                    history.add_match(r, home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score)
+                # else:
+                #     print('Am deja infomatiile pentru id={}'.format(r))
 
             # Acum iau rezultatul pentru aceste meciuri din arhiva
             print('Meciuri away_team...')
             for r in final_archive[competitie][m]['IDuri_Away']:
-                driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
-                wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
-                wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
-                home_team = ''
-                while len(home_team) == 0:
-                    home_team = driver.find_element_by_css_selector(
-                        '.tname-home > span:nth-child(1) > a:nth-child(2)').text
-                    if len(home_team) == 0:
-                        time.sleep(.5)
-                away_team = ''
-                while len(away_team) == 0:
-                    away_team = driver.find_element_by_css_selector(
-                        '.tname-away > span:nth-child(1) > a:nth-child(1)').text
-                    if len(away_team) == 0:
-                        time.sleep(.5)
-                home_team = home_team.replace("'", "`")
-                away_team = away_team.replace("'", "`")
-                print('Istoric away {} - {}'.format(home_team, away_team))
+                if history.get_match(r) is None:
+                    count = 0
+                    ex = Exception()
+                    while count < 3:
+                        try:
+                            driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
+                            break
+                        except Exception as e:
+                            ex = e
+                            print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                            count += 1
+                            driver.refresh()
+                            time.sleep(5)
 
-                fh_ht_score = -1
-                fh_at_score = -1
-                sh_ht_score = -1
-                sh_at_score = -1
-                try:
-                    results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
-                except:
-                    continue
-                try:
-                    fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
-                except:
-                    pass
-                try:
-                    fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
-                except:
-                    pass
-                try:
-                    sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
-                except:
-                    pass
-                try:
-                    sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
-                except:
-                    pass
-                if 'Rezultate_Away' not in final_archive[competitie][m].keys():
-                    final_archive[competitie][m]['Rezultate_Away'] = []
-                final_archive[competitie][m]['Rezultate_Away'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                    if count == 3:
+                        raise ex
+                    wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
+                    wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
+                    home_team = ''
+                    while len(home_team) == 0:
+                        home_team = driver.find_element_by_css_selector(
+                            '.tname-home > span:nth-child(1) > a:nth-child(2)').text
+                        if len(home_team) == 0:
+                            time.sleep(.5)
+                    away_team = ''
+                    while len(away_team) == 0:
+                        away_team = driver.find_element_by_css_selector(
+                            '.tname-away > span:nth-child(1) > a:nth-child(1)').text
+                        if len(away_team) == 0:
+                            time.sleep(.5)
+                    home_team = home_team.replace("'", "`")
+                    away_team = away_team.replace("'", "`")
+                    print('Istoric away {} - {}'.format(home_team, away_team))
+
+                    fh_ht_score = -1
+                    fh_at_score = -1
+                    sh_ht_score = -1
+                    sh_at_score = -1
+                    try:
+                        results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
+                    except:
+                        continue
+                    try:
+                        fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
+                    except:
+                        pass
+                    try:
+                        fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
+                    except:
+                        pass
+                    try:
+                        sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
+                    except:
+                        pass
+                    try:
+                        sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
+                    except:
+                        pass
+                    # if 'Rezultate_Away' not in final_archive[competitie][m].keys():
+                    #     final_archive[competitie][m]['Rezultate_Away'] = []
+                    # final_archive[competitie][m]['Rezultate_Away'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                    history.add_match(r, home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score)
+                # else:
+                #     print('Am deja infomatiile pentru id={}'.format(r))
+
 
 
             # Acum iau rezultatul pentru aceste meciuri din arhiva
             print('Meciuri H2H...')
             for r in final_archive[competitie][m]['IDuri_H2H']:
-                driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
-                wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
-                wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
-                home_team = ''
-                while len(home_team) == 0:
-                    home_team = driver.find_element_by_css_selector(
-                        '.tname-home > span:nth-child(1) > a:nth-child(2)').text
+                if history.get_match(r) is None:
+                    count = 0
+                    ex = Exception()
+                    while count < 3:
+                        try:
+                            driver.get('http://www.flashscore.ro/meci/{}/#sumar-meci'.format(r))
+                            break
+                        except Exception as e:
+                            ex = e
+                            print('Exceptie la incercarea de a lua meciurile ({})'.format(e.args))
+                            count += 1
+                            driver.refresh()
+                            time.sleep(5)
+
+                    if count == 3:
+                        raise ex
+                    wait_for_elem_by_css('.tname-home > span:nth-child(1) > a:nth-child(2)')
+                    wait_for_elem_by_css('.tname-away > span:nth-child(1) > a:nth-child(1)')
+                    home_team = ''
+                    tick = 0
+                    while len(home_team) == 0 and tick < 120:
+                        home_team = driver.find_element_by_css_selector(
+                            '.tname-home > span:nth-child(1) > a:nth-child(2)').text
+                        if len(home_team) == 0:
+                            time.sleep(.5)
+                            tick += 1
                     if len(home_team) == 0:
-                        time.sleep(.5)
-                away_team = ''
-                while len(away_team) == 0:
-                    away_team = driver.find_element_by_css_selector(
-                        '.tname-away > span:nth-child(1) > a:nth-child(1)').text
+                        continue
+                    away_team = ''
+                    tick = 0
+                    while len(away_team) == 0 and tick < 120:
+                        away_team = driver.find_element_by_css_selector(
+                            '.tname-away > span:nth-child(1) > a:nth-child(1)').text
+                        if len(away_team) == 0:
+                            time.sleep(.5)
+                            tick += 1
                     if len(away_team) == 0:
-                        time.sleep(.5)
-                home_team = home_team.replace("'", "`")
-                away_team = away_team.replace("'", "`")
-                print('Istoric H2H {} - {}'.format(home_team, away_team))
+                        continue
+                    home_team = home_team.replace("'", "`")
+                    away_team = away_team.replace("'", "`")
+                    print('Istoric H2H {} - {}'.format(home_team, away_team))
 
-                fh_ht_score = -1
-                fh_at_score = -1
-                sh_ht_score = -1
-                sh_at_score = -1
-                results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
-                try:
-                    fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
-                except:
-                    pass
-                try:
-                    fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
-                except:
-                    pass
-                try:
-                    sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
-                except:
-                    pass
-                try:
-                    sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
-                except:
-                    pass
-                if 'Rezultate_H2H' not in final_archive[competitie][m].keys():
-                    final_archive[competitie][m]['Rezultate_H2H'] = []
-                final_archive[competitie][m]['Rezultate_H2H'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                    fh_ht_score = -1
+                    fh_at_score = -1
+                    sh_ht_score = -1
+                    sh_at_score = -1
+                    try:
+                        results_table = driver.find_element_by_css_selector('#parts > tbody:nth-child(1)')
+                    except:
+                        continue
+                    try:
+                        fh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_home'").text)
+                    except:
+                        pass
+                    try:
+                        fh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p1_away'").text)
+                    except:
+                        pass
+                    try:
+                        sh_ht_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_home'").text)
+                    except:
+                        pass
+                    try:
+                        sh_at_score = int(results_table.find_element(By.CSS_SELECTOR, "span[class='p2_away'").text)
+                    except:
+                        pass
+                    # if 'Rezultate_H2H' not in final_archive[competitie][m].keys():
+                    #     final_archive[competitie][m]['Rezultate_H2H'] = []
+                    # final_archive[competitie][m]['Rezultate_H2H'].append([home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score])
+                    history.add_match(r, home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score)
+                # else:
+                #     print('Am deja infomatiile pentru id={}'.format(r))
 
+            archive[competitie].pop(m, None)
+            with open(os.path.join(results_folder, 'archive_partial.json'), 'wt') as f:
+                json.dump(archive, f)
+
+            with open(os.path.join(results_folder, 'archive_final.json'), 'wt') as f:
+                json.dump(final_archive, f)
+
+        archive.pop(competitie, None)
+        with open(os.path.join(results_folder, 'archive_partial.json'), 'wt') as f:
+            json.dump(archive, f)
 
     with open(os.path.join(results_folder, 'archive_final.json'), 'wt') as f:
         json.dump(final_archive, f)
-
-    # for competitie in meciuri.keys():
-    #     exists = competition_defined(k)
-    #     if isinstance(exists, str):
-    #         for m in meciuri_soccerstats[comp].keys():
-
 
 
     driver.quit()

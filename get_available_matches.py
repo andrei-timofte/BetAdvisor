@@ -3,6 +3,8 @@ import sys
 import time
 import json
 import datetime
+import copy
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -57,7 +59,18 @@ def get_matches():
 
     pagina = '.custom-filter > li:nth-child({}) > a:nth-child(1)'
 
-    driver.get('https://www.superbet.ro/pariuri-sportive')
+    count = 0
+    ex = Exception()
+    while count < 3:
+        try:
+            driver.get('https://www.superbet.ro/pariuri-sportive')
+            break
+        except Exception as e:
+            ex = e
+            print('Exceptie la incercarea de a lua rezultatele ({})'.format(e.args))
+            count += 1
+    if count == 3:
+        raise ex
 
     not_interested_competitions = []
     if os.path.isfile('not_interested_competitions.txt'):
@@ -67,7 +80,13 @@ def get_matches():
     if not os.path.isdir(get_results_folder()):
         os.mkdir(get_results_folder())
     meciuri = {}
-    meci = 0
+    # meci = 0
+    if os.path.isfile(os.path.join(get_results_folder(), 'meciuri.json')):
+        try:
+            with open(os.path.join(get_results_folder(), 'meciuri.json'), 'rt') as f:
+                meciuri = json.load(f)
+        except:
+            pass
 
     for pag in range(1, 10):
         driver.execute_script("window.scrollTo(0, 0);")
@@ -75,7 +94,6 @@ def get_matches():
         pag_elem = driver.find_element_by_css_selector(pagina.format(pag))
         if 'toate' not in str(pag_elem.text).lower():
             pag_elem.click()
-
             but_sporturi = '#sportsinfilter-TGlobal_Sportfilter_Sportsinfilter_XActor > span:nth-child(1) > div:nth-child(2) > button:nth-child(1)'
             but_sport = '.open > ul:nth-child(2) > li:nth-child({}) > a:nth-child(1) > label:nth-child(1)'
 
@@ -115,9 +133,11 @@ def get_matches():
                     prev_loc = bottom_elem.location["y"]
                     time.sleep(.5)
 
+                if str(pag) not in meciuri.keys():
+                    meciuri[str(pag)] = {}
                 all_competitions = driver.find_elements(By.CSS_SELECTOR, "div[class='tour']")
                 nr_competitions = len(all_competitions)
-                step = 10
+                step = 5
                 index = 0
                 while index < nr_competitions:
                     for c in range(index, index + step):
@@ -139,45 +159,73 @@ def get_matches():
                         elif str(competition_name).lower().strip().endswith('(f)'):
                             print("Competitie care nu prezinta interes (fotbal feminin) : " +
                                   str(competition_name))
+                        elif str(competition_name).lower().strip().endswith(' cup'):
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif str(competition_name).lower().strip().endswith(' cupa'):
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif str(competition_name).lower().strip().endswith(' supercupa'):
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif str(competition_name).lower().strip().endswith(' supercup'):
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif ' cup ' in str(competition_name).lower().strip():
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif ' cupa ' in str(competition_name).lower().strip():
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif ' supercupa ' in str(competition_name).lower().strip():
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
+                        elif ' supercup ' in str(competition_name).lower().strip():
+                            print("Competitie care nu prezinta interes (meci de cupa) : " +
+                                  str(competition_name))
                         elif str(competition_name).lower().strip().startswith('int '):
                             print("Competitie care nu prezinta interes (meciuri internationale) : " +
                                   str(competition_name))
+                        elif str(competition_name).strip() in meciuri[str(pag)].keys():
+                            print("Am cules deja rezultatele pentru competitia: " +
+                                  str(competition_name).strip())
                         else:
                             # Iau toate tabelele cu cote
-                            cote_btn = competition.find_element(By.CSS_SELECTOR, 'button')
-                            driver.execute_script('arguments[0].scrollIntoView();', competition)
-                            body = driver.find_element_by_css_selector('body')
-                            for _ in range(5):
-                                body.send_keys(Keys.ARROW_UP)
-                                time.sleep(.5)
-                            cote_btn.click()
-                            cote_btn = competition.find_element(By.CSS_SELECTOR,
-                                                                "ul[class='multiselect-container dropdown-menu']")
-                            toate = cote_btn.find_element(By.CSS_SELECTOR, "input[value='multiselect-all']")
-                            toate.click()
-                            time.sleep(2)
-                            # time.sleep(2)
-                            # body.click()
+                            # cote_btn = competition.find_element(By.CSS_SELECTOR, 'button')
+                            # driver.execute_script('arguments[0].scrollIntoView();', competition)
+                            # body = driver.find_element_by_css_selector('body')
+                            # for _ in range(10):
+                            #     body.send_keys(Keys.ARROW_UP)
+                            #     time.sleep(.5)
+                            # # cote_btn.click()
+                            # # cote_btn = competition.find_element(By.CSS_SELECTOR,
+                            # #                                     "ul[class='multiselect-container dropdown-menu']")
+                            # # toate = cote_btn.find_element(By.CSS_SELECTOR, "input[value='multiselect-all']")
+                            # # toate.click()
+                            # # time.sleep(2)
+                            # #
+                            # # # time.sleep(2)
+                            # # # body.click()
 
-                            cote_dict = {}
+                            # cote_dict = {}
                             tabele_cote = competition.find_elements(By.CSS_SELECTOR, "table[class='offer']")
                             nr_tabele = len(tabele_cote)
                             skip_competition = False
                             for t in range(nr_tabele):
                                 if skip_competition:
                                     break
-                                all_competitions = driver.find_elements(By.CSS_SELECTOR, "div[class='tour']")
-                                if c > nr_competitions:
-                                    break
-                                competition = all_competitions[c]
-                                tabele_cote = competition.find_elements(By.CSS_SELECTOR, "table[class='offer']")
+                                # all_competitions = driver.find_elements(By.CSS_SELECTOR, "div[class='tour']")
+                                # if c > nr_competitions:
+                                #     break
+                                # competition = all_competitions[c]
+                                # tabele_cote = competition.find_elements(By.CSS_SELECTOR, "table[class='offer']")
                                 tab = tabele_cote[t]
-                                time.sleep(.1)
-                                tip_cote = tab.find_element(By.CSS_SELECTOR, "td[class='bettype']").text.strip()  # Final, DGNG etc.
-                                optiuni_elem = tab.find_elements(By.CSS_SELECTOR, 'td[data-original-title]')  # '1' 'X' '2' '1r 1' etc
-                                lista_optiuni = []
-                                for opt in range(len(optiuni_elem)):
-                                    lista_optiuni.append(optiuni_elem[opt].text.strip())
+                                # time.sleep(.1)
+                                # tip_cote = tab.find_element(By.CSS_SELECTOR, "td[class='bettype']").text.strip()  # Final, DGNG etc.
+                                # optiuni_elem = tab.find_elements(By.CSS_SELECTOR, 'td[data-original-title]')  # '1' 'X' '2' '1r 1' etc
+                                # lista_optiuni = []
+                                # for opt in range(len(optiuni_elem)):
+                                #     lista_optiuni.append(optiuni_elem[opt].text.strip())
 
                                 meci = 0
                                 all_matches = tab.find_elements(By.CSS_SELECTOR, "tr[data-match]")
@@ -188,47 +236,66 @@ def get_matches():
                                     if ':' in txt or '(F)' in txt:
                                         print('Match in progress or female team... ' + txt)
                                     else:
-                                        if str(competition_name).strip() not in meciuri.keys():
-                                            meciuri[str(competition_name).strip()] = {}
+                                        if str(competition_name).strip() not in meciuri[str(pag)].keys():
+                                            meciuri[str(pag)][str(competition_name).strip()] = {}
                                             print("Competitie: " + str(competition_name).strip())
                                         meci += 1
-                                        if str(meci) not in meciuri[str(competition_name).strip()].keys():
-                                            meciuri[str(competition_name).strip()][str(meci)] = {}
+                                        if str(meci) not in meciuri[str(pag)][str(competition_name).strip()].keys():
+                                            meciuri[str(pag)][str(competition_name).strip()][str(meci)] = {}
                                         # print(txt)
                                             echipa1, echipa2 = txt.split(' - ', 1)
-                                            meciuri[str(competition_name).strip()][str(meci)]['Home'] = str(echipa1)
-                                            meciuri[str(competition_name).strip()][str(meci)]['Away'] = str(echipa2)
+                                            meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Home'] = str(echipa1)
+                                            meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Away'] = str(echipa2)
 
                                         # print(txt, " ", )
-                                        if 'Cote' not in meciuri[str(competition_name).strip()][str(meci)].keys():
-                                            meciuri[str(competition_name).strip()][str(meci)]['Cote'] = {}
-                                        if tip_cote not in meciuri[str(competition_name).strip()][str(meci)]['Cote'].keys():
-                                            meciuri[str(competition_name).strip()][str(meci)]['Cote'][tip_cote] = {}
-
-                                        cote_list = []
-                                        for g in m.find_elements(By.CSS_SELECTOR, "td[class='odd']"):
-                                            # print(g.text)
-                                            cote_list.append(g.text)
-                                        # 1
-                                        for cota in range(len(cote_list)):
-                                            meciuri[str(competition_name).strip()][str(meci)]['Cote'][tip_cote][lista_optiuni[cota]] = cote_list[cota]
+                                        # if 'Cote' not in meciuri[str(pag)][str(competition_name).strip()][str(meci)].keys():
+                                        #     meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Cote'] = {}
+                                        # if tip_cote not in meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Cote'].keys():
+                                        #     meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Cote'][tip_cote] = {}
+                                        #
+                                        # cote_list = []
+                                        # for g in m.find_elements(By.CSS_SELECTOR, "td[class='odd']"):
+                                        #     # print(g.text)
+                                        #     cote_list.append(g.text)
+                                        # # 1
+                                        # for cota in range(len(cote_list)):
+                                        #     meciuri[str(pag)][str(competition_name).strip()][str(meci)]['Cote'][tip_cote][lista_optiuni[cota]] = cote_list[cota]
                                 # for k, v in meciuri[str(competition_name).strip()][str(meci)]['Cote'].items():
                                 #     print(k + ' - ' + str(v))
+                                break
+                            with open(os.path.join(get_results_folder(), 'meciuri.json'), 'wt') as f:
+                                json.dump(meciuri, f)
+
                     index += step
                     all_competitions = driver.find_elements(By.CSS_SELECTOR, "div[class='tour']")
                     nr_competitions = len(all_competitions)
 
-                    with open(os.path.join(get_results_folder(), 'meciuri.json'), 'wt') as f:
-                        json.dump(meciuri, f)
-
+                    # break
+                    # # TODO Remove upper break
 
         else:
             break
 
     driver.quit()
 
-    with open(os.path.join(get_results_folder(), 'meciuri.json'), 'wt') as f:
+    with open(os.path.join(get_results_folder(), 'meciuri_1.json'), 'wt') as f:
         json.dump(meciuri, f)
+
+    new_meciuri = {}
+
+    for k in meciuri.keys():
+        for competition in meciuri[k].keys():
+            new_g = 0
+            if competition not in new_meciuri.keys():
+                new_meciuri[competition] = {}
+            for g in meciuri[k][competition].keys():
+                new_g += 1
+                # if len(new_meciuri[competition].keys()):
+                #     new_g = max([int(x) for x in new_meciuri[competition].keys()]) + 1
+                new_meciuri[competition][new_g] = copy.deepcopy(meciuri[k][competition][g])
+
+    with open(os.path.join(get_results_folder(), 'meciuri.json'), 'wt') as f:
+        json.dump(new_meciuri, f)
 
     return os.path.join(get_results_folder(), 'meciuri.json')
 

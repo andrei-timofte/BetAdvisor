@@ -4,6 +4,7 @@ import re
 import copy
 
 from db_helper import db_helper as db
+from history import db_history as history
 from StatsProvider import StatsProvider
 
 
@@ -54,28 +55,126 @@ class Algorithm5:
         for m in match_archive[competitie]:
             home_prediction = {}
             away_prediction = {}
-            if 'FINAL' in self.meciuri[competitie][m]['Cote']:
-                home_matches = len(match_archive[competitie][m]['Rezultate_Home'])
-                away_matches = len(match_archive[competitie][m]['Rezultate_Away'])
+            home_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Home'])
+            away_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Away'])
+            home_matches = len(home_matches_history)
+            away_matches = len(away_matches_history)
 
-                home_wins = sum([1 if (x[2] + x[4]) > (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_draws = sum([1 if (x[2] + x[4]) == (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_lost = sum([1 if (x[2] + x[4]) < (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
+            if home_matches == 0 or away_matches == 0:
+                continue
 
-                away_wins = sum([1 if (x[2] + x[4]) < (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_draws = sum([1 if (x[2] + x[4]) == (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_lost = sum([1 if (x[2] + x[4]) > (x[3] + x[5]) else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
+            # if 'FINAL' in self.meciuri[competitie][m]['Cote']:
+            home_wins = sum([1 if (x[2] + x[4]) > (x[3] + x[5]) else 0 for x in home_matches_history])
+            home_draws = sum([1 if (x[2] + x[4]) == (x[3] + x[5]) else 0 for x in home_matches_history])
+            home_lost = sum([1 if (x[2] + x[4]) < (x[3] + x[5]) else 0 for x in home_matches_history])
+
+            away_wins = sum([1 if (x[2] + x[4]) < (x[3] + x[5]) else 0 for x in away_matches_history])
+            away_draws = sum([1 if (x[2] + x[4]) == (x[3] + x[5]) else 0 for x in away_matches_history])
+            away_lost = sum([1 if (x[2] + x[4]) > (x[3] + x[5]) else 0 for x in away_matches_history])
+
+            # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
+            hw_prob = float(int(float(home_wins / home_matches) * 10000) / 100)
+            if hw_prob > 0:
+                hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
+            hd_prob = float(int(float(home_draws / home_matches) * 10000) / 100)
+            if hd_prob > 0:
+                hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
+            hl_prob = float(int(float(home_lost / home_matches) * 10000) / 100)
+            if hl_prob > 0:
+                hl_real_odd = float(int((1/hl_prob) * 10000) / 100)
+            else:
+                hl_real_odd = 100
+
+            aw_prob = float(int(float(away_wins / away_matches) * 10000) / 100)
+            if aw_prob > 0:
+                aw_real_odd = float(int((1/aw_prob) * 10000) / 100)
+            ad_prob = float(int(float(away_draws / away_matches) * 10000) / 100)
+            if ad_prob > 0:
+                ad_real_odd = float(int((1/ad_prob) * 10000) / 100)
+            else:
+                ad_real_odd = 100
+            al_prob = float(int(float(away_lost / away_matches) * 10000) / 100)
+            if al_prob > 0:
+                al_real_odd = float(int((1/al_prob) * 10000) / 100)
+
+            if hw_prob >= self.treshold:
+                if 'FINAL' not in home_prediction.keys():
+                    home_prediction['FINAL'] = {}
+                if 'Win' not in home_prediction['FINAL'].keys():
+                    home_prediction['FINAL']['Win'] = {}
+                home_prediction['FINAL']['Win']['Probab'] = hw_prob
+                home_prediction['FINAL']['Win']['Odd'] = hw_real_odd
+
+            if hd_prob >= self.treshold:
+                if 'FINAL' not in home_prediction.keys():
+                    home_prediction['FINAL'] = {}
+                if 'Draw' not in home_prediction['FINAL'].keys():
+                    home_prediction['FINAL']['Draw'] = {}
+                home_prediction['FINAL']['Draw']['Probab'] = hd_prob
+                home_prediction['FINAL']['Draw']['Odd'] = hd_real_odd
+
+            if hl_prob >= self.treshold:
+                if 'FINAL' not in home_prediction.keys():
+                    home_prediction['FINAL'] = {}
+                if 'Lose' not in home_prediction['FINAL'].keys():
+                    home_prediction['FINAL']['Lose'] = {}
+                home_prediction['FINAL']['Lose']['Probab'] = hl_prob
+                home_prediction['FINAL']['Lose']['Odd'] = hl_real_odd
+
+            if aw_prob >= self.treshold:
+                if 'FINAL' not in away_prediction.keys():
+                    away_prediction['FINAL'] = {}
+                if 'Win' not in away_prediction['FINAL'].keys():
+                    away_prediction['FINAL']['Win'] = {}
+                away_prediction['FINAL']['Win']['Probab'] = aw_prob
+                away_prediction['FINAL']['Win']['Odd'] = aw_real_odd
+
+            if ad_prob >= self.treshold:
+                if 'FINAL' not in away_prediction.keys():
+                    away_prediction['FINAL'] = {}
+                if 'Draw' not in away_prediction['FINAL'].keys():
+                    away_prediction['FINAL']['Draw'] = {}
+                away_prediction['FINAL']['Draw']['Probab'] = ad_prob
+                away_prediction['FINAL']['Draw']['Odd'] = ad_real_odd
+
+            if al_prob >= self.treshold:
+                if 'FINAL' not in away_prediction.keys():
+                    away_prediction['FINAL'] = {}
+                if 'Lose' not in away_prediction['FINAL'].keys():
+                    away_prediction['FINAL']['Lose'] = {}
+                away_prediction['FINAL']['Lose']['Probab'] = al_prob
+                away_prediction['FINAL']['Lose']['Odd'] = al_real_odd
+
+
+            # if r'PRIMA REPRIZA' in self.meciuri[competitie][m]['Cote']:
+                # home_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Home'])
+                # away_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Away'])
+                # home_matches = len(home_matches_history)
+                # away_matches = len(away_matches_history)
+            pe_reprize = True
+            count = sum([1 if x[4] == -1 or x[5] == -1 else 0 for x in home_matches_history])
+            if count == 0:
+                count = sum([1 if x[4] == -1 or x[5] == -1 else 0 for x in away_matches_history])
+
+            if count == 0:
+                home_wins = sum([1 if x[2] > x[3] else 0 for x in home_matches_history])
+                home_draws = sum([1 if x[2] == x[3] else 0 for x in home_matches_history])
+                home_lost = sum([1 if x[2] < x[3] else 0 for x in home_matches_history])
+
+                away_wins = sum([1 if x[2] < x[3] else 0 for x in away_matches_history])
+                away_draws = sum([1 if x[2] == x[3] else 0 for x in away_matches_history])
+                away_lost = sum([1 if x[2] > x[3] else 0 for x in away_matches_history])
 
                 # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
                 hw_prob = float(int(float(home_wins / home_matches) * 10000) / 100)
-                hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
+                if hw_prob > 0:
+                    hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
                 hd_prob = float(int(float(home_draws / home_matches) * 10000) / 100)
-                hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
+                if hd_prob > 0:
+                    hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
                 hl_prob = float(int(float(home_lost / home_matches) * 10000) / 100)
                 if hl_prob > 0:
                     hl_real_odd = float(int((1/hl_prob) * 10000) / 100)
-                else:
-                    hl_real_odd = 100
 
                 aw_prob = float(int(float(away_wins / away_matches) * 10000) / 100)
                 if aw_prob > 0:
@@ -83,274 +182,214 @@ class Algorithm5:
                 ad_prob = float(int(float(away_draws / away_matches) * 10000) / 100)
                 if ad_prob > 0:
                     ad_real_odd = float(int((1/ad_prob) * 10000) / 100)
-                else:
-                    ad_real_odd = 100
                 al_prob = float(int(float(away_lost / away_matches) * 10000) / 100)
                 if al_prob > 0:
                     al_real_odd = float(int((1/al_prob) * 10000) / 100)
 
                 if hw_prob >= self.treshold:
-                    if 'FINAL' not in home_prediction.keys():
-                        home_prediction['FINAL'] = {}
-                    if 'Win' not in home_prediction['FINAL'].keys():
-                        home_prediction['FINAL']['Win'] = {}
-                    home_prediction['FINAL']['Win']['Probab'] = hw_prob
-                    home_prediction['FINAL']['Win']['Odd'] = hw_real_odd
-
+                    if r'PRIMA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Win' not in home_prediction[r'PRIMA REPRIZA'].keys():
+                        home_prediction[r'PRIMA REPRIZA']['Win'] = {}
+                    home_prediction[r'PRIMA REPRIZA']['Win']['Probab'] = hw_prob
+                    home_prediction[r'PRIMA REPRIZA']['Win']['Odd'] = hw_real_odd
                 if hd_prob >= self.treshold:
-                    if 'FINAL' not in home_prediction.keys():
-                        home_prediction['FINAL'] = {}
-                    if 'Draw' not in home_prediction['FINAL'].keys():
-                        home_prediction['FINAL']['Draw'] = {}
-                    home_prediction['FINAL']['Draw']['Probab'] = hd_prob
-                    home_prediction['FINAL']['Draw']['Odd'] = hd_real_odd
-
+                    if r'PRIMA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Draw' not in home_prediction[r'PRIMA REPRIZA'].keys():
+                        home_prediction[r'PRIMA REPRIZA']['Draw'] = {}
+                    home_prediction[r'PRIMA REPRIZA']['Draw']['Probab'] = hd_prob
+                    home_prediction[r'PRIMA REPRIZA']['Draw']['Odd'] = hd_real_odd
                 if hl_prob >= self.treshold:
-                    if 'FINAL' not in home_prediction.keys():
-                        home_prediction['FINAL'] = {}
-                    if 'Lose' not in home_prediction['FINAL'].keys():
-                        home_prediction['FINAL']['Lose'] = {}
-                    home_prediction['FINAL']['Lose']['Probab'] = hl_prob
-                    home_prediction['FINAL']['Lose']['Odd'] = hl_real_odd
+                    if r'PRIMA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Lose' not in home_prediction[r'PRIMA REPRIZA'].keys():
+                        home_prediction[r'PRIMA REPRIZA']['Lose'] = {}
+                    home_prediction[r'PRIMA REPRIZA']['Lose']['Probab'] = hl_prob
+                    home_prediction[r'PRIMA REPRIZA']['Lose']['Odd'] = hl_real_odd
 
                 if aw_prob >= self.treshold:
-                    if 'FINAL' not in away_prediction.keys():
-                        away_prediction['FINAL'] = {}
-                    if 'Win' not in away_prediction['FINAL'].keys():
-                        away_prediction['FINAL']['Win'] = {}
-                    away_prediction['FINAL']['Win']['Probab'] = aw_prob
-                    away_prediction['FINAL']['Win']['Odd'] = aw_real_odd
-
+                    if r'PRIMA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Win' not in away_prediction[r'PRIMA REPRIZA'].keys():
+                        away_prediction[r'PRIMA REPRIZA']['Win'] = {}
+                    away_prediction[r'PRIMA REPRIZA']['Win']['Probab'] = aw_prob
+                    away_prediction[r'PRIMA REPRIZA']['Win']['Odd'] = aw_real_odd
                 if ad_prob >= self.treshold:
-                    if 'FINAL' not in away_prediction.keys():
-                        away_prediction['FINAL'] = {}
-                    if 'Draw' not in away_prediction['FINAL'].keys():
-                        away_prediction['FINAL']['Draw'] = {}
-                    away_prediction['FINAL']['Draw']['Probab'] = ad_prob
-                    away_prediction['FINAL']['Draw']['Odd'] = ad_real_odd
-
+                    if r'PRIMA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Draw' not in away_prediction[r'PRIMA REPRIZA'].keys():
+                        away_prediction[r'PRIMA REPRIZA']['Draw'] = {}
+                    away_prediction[r'PRIMA REPRIZA']['Draw']['Probab'] = ad_prob
+                    away_prediction[r'PRIMA REPRIZA']['Draw']['Odd'] = ad_real_odd
                 if al_prob >= self.treshold:
-                    if 'FINAL' not in away_prediction.keys():
-                        away_prediction['FINAL'] = {}
-                    if 'Lose' not in away_prediction['FINAL'].keys():
-                        away_prediction['FINAL']['Lose'] = {}
-                    away_prediction['FINAL']['Lose']['Probab'] = al_prob
-                    away_prediction['FINAL']['Lose']['Odd'] = al_real_odd
+                    if r'PRIMA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'PRIMA REPRIZA'] = {}
+                    if 'Lose' not in away_prediction[r'PRIMA REPRIZA'].keys():
+                        away_prediction[r'PRIMA REPRIZA']['Lose'] = {}
+                    away_prediction[r'PRIMA REPRIZA']['Lose']['Probab'] = al_prob
+                    away_prediction[r'PRIMA REPRIZA']['Lose']['Odd'] = al_real_odd
 
+                # if r'A DOUA REPRIZA' in self.meciuri[competitie][m]['Cote']:
+                    # home_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Home'])
+                    # away_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Away'])
+                    # home_matches = len(home_matches_history)
+                    # away_matches = len(away_matches_history)
 
-            if r'PRIMA REPRIZ\u0102' in self.meciuri[competitie][m]['Cote']:
-                home_matches = len(match_archive[competitie][m]['Rezultate_Home'])
-                away_matches = len(match_archive[competitie][m]['Rezultate_Away'])
+                home_wins = sum([1 if x[4] > x[5] else 0 for x in home_matches_history])
+                home_draws = sum([1 if x[4] == x[5] else 0 for x in home_matches_history])
+                home_lost = sum([1 if x[4] < x[5] else 0 for x in home_matches_history])
 
-                home_wins = sum([1 if x[2] > x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_draws = sum([1 if x[2] == x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_lost = sum([1 if x[2] < x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-
-                away_wins = sum([1 if x[2] < x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_draws = sum([1 if x[2] == x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_lost = sum([1 if x[2] > x[3] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
+                away_wins = sum([1 if x[4] < x[5] else 0 for x in away_matches_history])
+                away_draws = sum([1 if x[4] == x[5] else 0 for x in away_matches_history])
+                away_lost = sum([1 if x[4] > x[5] else 0 for x in away_matches_history])
 
                 # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
                 hw_prob = float(int(float(home_wins / home_matches) * 10000) / 100)
-                hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
+                if hw_prob > 0:
+                    hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
                 hd_prob = float(int(float(home_draws / home_matches) * 10000) / 100)
-                hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
+                if hd_prob > 0:
+                    hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
                 hl_prob = float(int(float(home_lost / home_matches) * 10000) / 100)
-                hl_real_odd = float(int((1/hl_prob) * 10000) / 100)
+                if hl_prob > 0:
+                    hl_real_odd = float(int((1/hl_prob) * 10000) / 100)
 
                 aw_prob = float(int(float(away_wins / away_matches) * 10000) / 100)
-                aw_real_odd = float(int((1/aw_prob) * 10000) / 100)
+                if aw_prob > 0:
+                    aw_real_odd = float(int((1/aw_prob) * 10000) / 100)
                 ad_prob = float(int(float(away_draws / away_matches) * 10000) / 100)
-                ad_real_odd = float(int((1/ad_prob) * 10000) / 100)
+                if ad_prob > 0:
+                    ad_real_odd = float(int((1/ad_prob) * 10000) / 100)
                 al_prob = float(int(float(away_lost / away_matches) * 10000) / 100)
-                al_real_odd = float(int((1/al_prob) * 10000) / 100)
+                if al_prob > 0:
+                    al_real_odd = float(int((1/al_prob) * 10000) / 100)
 
                 if hw_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Win' not in home_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102']['Win'] = {}
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Win']['Probab'] = hw_prob
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Win']['Odd'] = hw_real_odd
+                    if r'A DOUA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Win' not in home_prediction[r'A DOUA REPRIZA'].keys():
+                        home_prediction[r'A DOUA REPRIZA']['Win'] = {}
+                    home_prediction[r'A DOUA REPRIZA']['Win']['Probab'] = hw_prob
+                    home_prediction[r'A DOUA REPRIZA']['Win']['Odd'] = hw_real_odd
                 if hd_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Draw' not in home_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102']['Draw'] = {}
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Draw']['Probab'] = hd_prob
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Draw']['Odd'] = hd_real_odd
+                    if r'A DOUA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Draw' not in home_prediction[r'A DOUA REPRIZA'].keys():
+                        home_prediction[r'A DOUA REPRIZA']['Draw'] = {}
+                    home_prediction[r'A DOUA REPRIZA']['Draw']['Probab'] = hd_prob
+                    home_prediction[r'A DOUA REPRIZA']['Draw']['Odd'] = hd_real_odd
                 if hl_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Lose' not in home_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        home_prediction[r'PRIMA REPRIZ\u0102']['Lose'] = {}
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Lose']['Probab'] = hl_prob
-                    home_prediction[r'PRIMA REPRIZ\u0102']['Lose']['Odd'] = hl_real_odd
+                    if r'A DOUA REPRIZA' not in home_prediction.keys():
+                        home_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Lose' not in home_prediction[r'A DOUA REPRIZA'].keys():
+                        home_prediction[r'A DOUA REPRIZA']['Lose'] = {}
+                    home_prediction[r'A DOUA REPRIZA']['Lose']['Probab'] = hl_prob
+                    home_prediction[r'A DOUA REPRIZA']['Lose']['Odd'] = hl_real_odd
 
                 if aw_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Win' not in away_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102']['Win'] = {}
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Win']['Probab'] = aw_prob
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Win']['Odd'] = aw_real_odd
+                    if r'A DOUA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Win' not in away_prediction[r'A DOUA REPRIZA'].keys():
+                        away_prediction[r'A DOUA REPRIZA']['Win'] = {}
+                    away_prediction[r'A DOUA REPRIZA']['Win']['Probab'] = aw_prob
+                    away_prediction[r'A DOUA REPRIZA']['Win']['Odd'] = aw_real_odd
                 if ad_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Draw' not in away_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102']['Draw'] = {}
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Draw']['Probab'] = ad_prob
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Draw']['Odd'] = ad_real_odd
+                    if r'A DOUA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Draw' not in away_prediction[r'A DOUA REPRIZA'].keys():
+                        away_prediction[r'A DOUA REPRIZA']['Draw'] = {}
+                    away_prediction[r'A DOUA REPRIZA']['Draw']['Probab'] = ad_prob
+                    away_prediction[r'A DOUA REPRIZA']['Draw']['Odd'] = ad_real_odd
                 if al_prob >= self.treshold:
-                    if r'PRIMA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102'] = {}
-                    if 'Lose' not in away_prediction[r'PRIMA REPRIZ\u0102'].keys():
-                        away_prediction[r'PRIMA REPRIZ\u0102']['Lose'] = {}
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Lose']['Probab'] = al_prob
-                    away_prediction[r'PRIMA REPRIZ\u0102']['Lose']['Odd'] = al_real_odd
+                    if r'A DOUA REPRIZA' not in away_prediction.keys():
+                        away_prediction[r'A DOUA REPRIZA'] = {}
+                    if 'Lose' not in away_prediction[r'A DOUA REPRIZA'].keys():
+                        away_prediction[r'A DOUA REPRIZA']['Lose'] = {}
+                    away_prediction[r'A DOUA REPRIZA']['Lose']['Probab'] = al_prob
+                    away_prediction[r'A DOUA REPRIZA']['Lose']['Odd'] = al_real_odd
 
-            if r'A DOUA REPRIZ\u0102' in self.meciuri[competitie][m]['Cote']:
-                home_matches = len(match_archive[competitie][m]['Rezultate_Home'])
-                away_matches = len(match_archive[competitie][m]['Rezultate_Away'])
+                # if 'DGNG' in self.meciuri[competitie][m]['Cote']:
+                    # home_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Home'])
+                    # away_matches_history = history.get_matches(match_archive[competitie][m]['IDuri_Away'])
+                    # home_matches = len(home_matches_history)
+                    # away_matches = len(away_matches_history)
 
-                home_wins = sum([1 if x[4] > x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_draws = sum([1 if x[4] == x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_lost = sum([1 if x[4] < x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
+            home_goals = sum([1 if (x[2] > 0) or (x[4] > 0) else 0 for x in home_matches_history])
+            home_no_goals = sum([1 if (x[2] == 0) and (x[4] == 0) else 0 for x in home_matches_history])
 
-                away_wins = sum([1 if x[4] < x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_draws = sum([1 if x[4] == x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_lost = sum([1 if x[4] > x[5] else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
+            away_goals = sum([1 if (x[3] > 0) or (x[5] > 0) else 0 for x in home_matches_history])
+            away_no_goals = sum([1 if (x[3] == 0) and (x[5] == 0) else 0 for x in home_matches_history])
 
-                # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
-                hw_prob = float(int(float(home_wins / home_matches) * 10000) / 100)
-                hw_real_odd = float(int((1/hw_prob) * 10000) / 100)
-                hd_prob = float(int(float(home_draws / home_matches) * 10000) / 100)
-                hd_real_odd = float(int((1/hd_prob) * 10000) / 100)
-                hl_prob = float(int(float(home_lost / home_matches) * 10000) / 100)
-                hl_real_odd = float(int((1/hl_prob) * 10000) / 100)
+            # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
+            hg_prob = float(int(float(home_goals / home_matches) * 10000) / 100)
+            if hg_prob > 0:
+                hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
+            hng_prob = float(int(float(home_no_goals / home_matches) * 10000) / 100)
+            if hng_prob > 0:
+                hng_real_odd = float(int((1/hng_prob) * 10000) / 100)
+            else:
+                hng_real_odd = 100
 
-                aw_prob = float(int(float(away_wins / away_matches) * 10000) / 100)
-                aw_real_odd = float(int((1/aw_prob) * 10000) / 100)
-                ad_prob = float(int(float(away_draws / away_matches) * 10000) / 100)
-                ad_real_odd = float(int((1/ad_prob) * 10000) / 100)
-                al_prob = float(int(float(away_lost / away_matches) * 10000) / 100)
-                al_real_odd = float(int((1/al_prob) * 10000) / 100)
+            ag_prob = float(int(float(away_goals / away_matches) * 10000) / 100)
+            if ag_prob > 0:
+                ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
+            ang_prob = float(int(float(away_no_goals / away_matches) * 10000) / 100)
+            if ang_prob > 0:
+                ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
 
-                if hw_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Win' not in home_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102']['Win'] = {}
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Win']['Probab'] = hw_prob
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Win']['Odd'] = hw_real_odd
-                if hd_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Draw' not in home_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102']['Draw'] = {}
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Draw']['Probab'] = hd_prob
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Draw']['Odd'] = hd_real_odd
-                if hl_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in home_prediction.keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Lose' not in home_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        home_prediction[r'A DOUA REPRIZ\u0102']['Lose'] = {}
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Lose']['Probab'] = hl_prob
-                    home_prediction[r'A DOUA REPRIZ\u0102']['Lose']['Odd'] = hl_real_odd
+            if hg_prob >= self.treshold:
+                if 'DGNG' not in home_prediction.keys():
+                    home_prediction['DGNG'] = {}
+                if 'DG' not in home_prediction['DGNG'].keys():
+                    home_prediction['DGNG']['DG'] = {}
+                home_prediction['DGNG']['DG']['Probab'] = hg_prob
+                home_prediction['DGNG']['DG']['Odd'] = hg_real_odd
+            if hng_prob >= self.treshold:
+                if 'DGNG' not in home_prediction.keys():
+                    home_prediction['DGNG'] = {}
+                if 'NDG' not in home_prediction['DGNG'].keys():
+                    home_prediction['DGNG']['NDG'] = {}
+                home_prediction['DGNG']['NDG']['Probab'] = hng_prob
+                home_prediction['DGNG']['NDG']['Odd'] = hng_real_odd
 
-                if aw_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Win' not in away_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102']['Win'] = {}
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Win']['Probab'] = aw_prob
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Win']['Odd'] = aw_real_odd
-                if ad_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Draw' not in away_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102']['Draw'] = {}
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Draw']['Probab'] = ad_prob
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Draw']['Odd'] = ad_real_odd
-                if al_prob >= self.treshold:
-                    if r'A DOUA REPRIZ\u0102' not in away_prediction.keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102'] = {}
-                    if 'Lose' not in away_prediction[r'A DOUA REPRIZ\u0102'].keys():
-                        away_prediction[r'A DOUA REPRIZ\u0102']['Lose'] = {}
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Lose']['Probab'] = al_prob
-                    away_prediction[r'A DOUA REPRIZ\u0102']['Lose']['Odd'] = al_real_odd
+            if ag_prob >= self.treshold:
+                if 'DGNG' not in away_prediction.keys():
+                    away_prediction['DGNG'] = {}
+                if 'DG' not in away_prediction['DGNG'].keys():
+                    away_prediction['DGNG']['DG'] = {}
+                away_prediction['DGNG']['DG']['Probab'] = ag_prob
+                away_prediction['DGNG']['DG']['Odd'] = ag_real_odd
+            if ang_prob >= self.treshold:
+                if 'DGNG' not in away_prediction.keys():
+                    away_prediction['DGNG'] = {}
+                if 'NDG' not in away_prediction['DGNG'].keys():
+                    away_prediction['DGNG']['NDG'] = {}
+                away_prediction['DGNG']['NDG']['Probab'] = ang_prob
+                away_prediction['DGNG']['NDG']['Odd'] = ang_real_odd
 
-            if 'DGNG' in self.meciuri[competitie][m]['Cote']:
-                home_matches = len(match_archive[competitie][m]['Rezultate_Home'])
-                away_matches = len(match_archive[competitie][m]['Rezultate_Away'])
+            if count == 0:
+                # R1
+                home_goals = sum([1 if x[2] > 0 else 0 for x in home_matches_history])
+                home_no_goals = sum([1 if x[2] == 0 else 0 for x in home_matches_history])
 
-                home_goals = sum([1 if (x[2] > 0) or (x[4] > 0) else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_no_goals = sum([1 if (x[2] == 0) and (x[4] == 0) else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-
-                away_goals = sum([1 if (x[3] > 0) or (x[5] > 0) else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_no_goals = sum([1 if (x[3] == 0) and (x[5] == 0) else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
+                away_goals = sum([1 if x[3] > 0 else 0 for x in away_matches_history])
+                away_no_goals = sum([1 if x[3] == 0 else 0 for x in away_matches_history])
 
                 # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
                 hg_prob = float(int(float(home_goals / home_matches) * 10000) / 100)
-                hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
+                if hg_prob > 0:
+                    hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
                 hng_prob = float(int(float(home_no_goals / home_matches) * 10000) / 100)
                 if hng_prob > 0:
                     hng_real_odd = float(int((1/hng_prob) * 10000) / 100)
-                else:
-                    hng_real_odd = 100
 
                 ag_prob = float(int(float(away_goals / away_matches) * 10000) / 100)
-                ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
+                if ag_prob > 0:
+                    ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
                 ang_prob = float(int(float(away_no_goals / away_matches) * 10000) / 100)
-                ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
-
-                if hg_prob >= self.treshold:
-                    if 'DGNG' not in home_prediction.keys():
-                        home_prediction['DGNG'] = {}
-                    if 'DG' not in home_prediction['DGNG'].keys():
-                        home_prediction['DGNG']['DG'] = {}
-                    home_prediction['DGNG']['DG']['Probab'] = hg_prob
-                    home_prediction['DGNG']['DG']['Odd'] = hg_real_odd
-                if hng_prob >= self.treshold:
-                    if 'DGNG' not in home_prediction.keys():
-                        home_prediction['DGNG'] = {}
-                    if 'NDG' not in home_prediction['DGNG'].keys():
-                        home_prediction['DGNG']['NDG'] = {}
-                    home_prediction['DGNG']['NDG']['Probab'] = hng_prob
-                    home_prediction['DGNG']['NDG']['Odd'] = hng_real_odd
-
-                if ag_prob >= self.treshold:
-                    if 'DGNG' not in away_prediction.keys():
-                        away_prediction['DGNG'] = {}
-                    if 'DG' not in away_prediction['DGNG'].keys():
-                        away_prediction['DGNG']['DG'] = {}
-                    away_prediction['DGNG']['DG']['Probab'] = ag_prob
-                    away_prediction['DGNG']['DG']['Odd'] = ag_real_odd
-                if ang_prob >= self.treshold:
-                    if 'DGNG' not in away_prediction.keys():
-                        away_prediction['DGNG'] = {}
-                    if 'NDG' not in away_prediction['DGNG'].keys():
-                        away_prediction['DGNG']['NDG'] = {}
-                    away_prediction['DGNG']['NDG']['Probab'] = ang_prob
-                    away_prediction['DGNG']['NDG']['Odd'] = ang_real_odd
-
-                # R1
-                home_goals = sum([1 if x[2] > 0 else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_no_goals = sum([1 if x[2] == 0 else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-
-                away_goals = sum([1 if x[3] > 0 else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_no_goals = sum([1 if x[3] == 0 else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-
-                # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
-                hg_prob = float(int(float(home_goals / home_matches) * 10000) / 100)
-                hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
-                hng_prob = float(int(float(home_no_goals / home_matches) * 10000) / 100)
-                hng_real_odd = float(int((1/hng_prob) * 10000) / 100)
-
-                ag_prob = float(int(float(away_goals / away_matches) * 10000) / 100)
-                ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
-                ang_prob = float(int(float(away_no_goals / away_matches) * 10000) / 100)
-                ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
+                if ang_prob > 0:
+                    ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
 
                 if hg_prob >= self.treshold:
                     if 'DGNG' not in home_prediction.keys():
@@ -383,22 +422,26 @@ class Algorithm5:
                     away_prediction['DGNG']['NDG1']['Odd'] = ang_real_odd
 
                 # R2
-                home_goals = sum([1 if x[4] > 0 else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
-                home_no_goals = sum([1 if x[4] == 0 else 0 for x in match_archive[competitie][m]['Rezultate_Home']])
+                home_goals = sum([1 if x[4] > 0 else 0 for x in home_matches_history])
+                home_no_goals = sum([1 if x[4] == 0 else 0 for x in home_matches_history])
 
-                away_goals = sum([1 if x[5] > 0 else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
-                away_no_goals = sum([1 if x[5] == 0 else 0 for x in match_archive[competitie][m]['Rezultate_Away']])
+                away_goals = sum([1 if x[5] > 0 else 0 for x in away_matches_history])
+                away_no_goals = sum([1 if x[5] == 0 else 0 for x in away_matches_history])
 
                 # Complic lucrurile mai jos pentru a ma asigura ca am doar 2 zecimale dupa virgula
                 hg_prob = float(int(float(home_goals / home_matches) * 10000) / 100)
-                hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
+                if hg_prob > 0:
+                    hg_real_odd = float(int((1/hg_prob) * 10000) / 100)
                 hng_prob = float(int(float(home_no_goals / home_matches) * 10000) / 100)
-                hng_real_odd = float(int((1/hng_prob) * 10000) / 100)
+                if hng_prob > 0:
+                    hng_real_odd = float(int((1/hng_prob) * 10000) / 100)
 
                 ag_prob = float(int(float(away_goals / away_matches) * 10000) / 100)
-                ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
+                if ag_prob > 0:
+                    ag_real_odd = float(int((1/ag_prob) * 10000) / 100)
                 ang_prob = float(int(float(away_no_goals / away_matches) * 10000) / 100)
-                ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
+                if ang_prob > 0:
+                    ang_real_odd = float(int((1/ang_prob) * 10000) / 100)
 
                 if hg_prob >= self.treshold:
                     if 'DGNG' not in home_prediction.keys():

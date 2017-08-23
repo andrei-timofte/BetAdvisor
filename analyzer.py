@@ -93,7 +93,7 @@ def analyze_matches(matches_path):
                     meciuri_soccerstats[exists][m] = {}
                     meciuri_soccerstats[exists][m]['Home'] = echipa_home
                     meciuri_soccerstats[exists][m]['Away'] = echipa_away
-                    meciuri_soccerstats[exists][m]['Cote'] = meciuri[k][m]['Cote']
+                    # meciuri_soccerstats[exists][m]['Cote'] = meciuri[k][m]['Cote']
 
     with open(os.path.join(results_folder, 'meciuri_soccerstats.json'), 'wt') as f:
         json.dump(meciuri_soccerstats, f)
@@ -108,15 +108,16 @@ def analyze_matches(matches_path):
     #     Algorithm6(meciuri_soccerstats, results_folder)
     # ]
 
-    algoritmi = [Algorithm1(meciuri_soccerstats, results_folder),
-                 Algorithm2(meciuri_soccerstats, results_folder),
-                 Algorithm2C(meciuri_soccerstats, results_folder),
-                 Algorithm3(meciuri_soccerstats, results_folder),
-                 Algorithm3C(meciuri_soccerstats, results_folder),
-                 Algorithm4(meciuri_soccerstats, results_folder),
+    algoritmi = [
+        # Algorithm1(meciuri_soccerstats, results_folder),
+        #          Algorithm2(meciuri_soccerstats, results_folder),
+        # #          Algorithm2C(meciuri_soccerstats, results_folder),
+        #          Algorithm3(meciuri_soccerstats, results_folder),
+        # #          Algorithm3C(meciuri_soccerstats, results_folder),
+        #          Algorithm4(meciuri_soccerstats, results_folder),
                  Algorithm5(meciuri_soccerstats, results_folder),
-                 Algorithm6(meciuri_soccerstats, results_folder),
-                 Algorithm7(meciuri_soccerstats, results_folder)
+                 # Algorithm6(meciuri_soccerstats, results_folder),
+                 # Algorithm7(meciuri_soccerstats, results_folder)
                  ]
 
     result = {}
