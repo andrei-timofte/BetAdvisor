@@ -1,15 +1,9 @@
-import os
-import json
-import re
-import copy
-
-from db_helper import db_helper as db
-from StatsProvider import StatsProvider
+from algorithm import Algorithm
+from constants import *
 
 
-class Algorithm6:
-
-    def __init__(self, meciuri, path_for_logs):
+class Algorithm6(Algorithm):
+    def run(self):
         self.name = "Over/Under 2.5 tip 1"
         self.description = """Acest algoritm foloseste o modalitate de analiza luata de pe net (nu mai stiu exact de unde):
 Hello!
@@ -33,69 +27,61 @@ That would mean to put a 3.5/10 units bet on over 2.5 goals. The maximum results
 
 I usually place a bet only if I get a minimum +/-5 points result. So, for example, if I get a +6 I place a 6/10 units bet on over 2.5 goals. 
         """
-        self.meciuri = meciuri
-        self.path_for_logs = path_for_logs
-        self.pattern = re.compile('[\W_]+', re.UNICODE)
+        print(self.name)
+        self.db_name = 'algorithm6.db'
+        self.init_db()
         self.treshold = 6
-        self.only_home_away_maches = False
+        while True:
+            val = self.queue.get()
+            if val is None:
+                return
+            self.analyze(val)
 
-    def set_points_treshold(self, treshold: int):
-        if treshold < 0 or treshold > 10:
-            print('Treshold-ul trebuie sa fie intre 0 si 10! Default este 6!')
-            return
-        self.treshold = treshold
+    def analyze(self, match_info):
+        print(self.name, "Analyzing: {}".format(match_info))
+        match_id = list(match_info.keys())[0]
+        if self.db.record_exists(int(match_id)):
+            predictie = self.db.get_records(match_id)
+            if predictie[-1] != 0:
+                print(predictie[-1])
+            print('Am deja analiza mecului cu id {}:{}'.format(match_id, 'Aici vine analiza!'))
+        else:
+            # Analiza propriu-zisa
+            score = 0
+            home_stats = match_info[match_id][0]['Stats']['Home_History']
+            away_stats = match_info[match_id][0]['Stats']['Away_History']
 
+            for match in home_stats[:4]:
+                if sum(match[1:-1]) > 2:
+                    score += 0.5
+                else:
+                    score -= 0.5
+                if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
+                    score += 0.75
+                else:
+                    score -= 0.75
+            for match in away_stats[:4]:
+                if sum(match[1:-1]) > 2:
+                    score += 0.5
+                else:
+                    score -= 0.5
+                if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
+                    score += 0.75
+                else:
+                    score -= 0.75
 
-    def analyze(self, competitie: str):
-        """
-        Calea pentru loguri se primeste la initializare pentru ca va fi aceeasi pentru fiecare thread.
-        Meciurile se primesc sub forma de dictionar (json) la initializare intru cat nu se modifica in cursul analizei.
-        :param competitie: Competitia de pe superbet
-        :return: dict. Castigatorii pentru fiecare meci, sub forma de dictionar in care cheia va fi numarul meciului si valoarea va fi castigatorul preconizat
-        """
-        # stats_provider = StatsProvider(competitie)
+            print(score)
+            predict = Constants.Predictions.FULL_TIME_OVER_25 if (score >= abs(self.treshold) or
+                                                                  score <= (-1 * abs(self.treshold))) else 0
 
-        winners = {competitie: {}}
-        if competitie not in self.meciuri.keys():
-            return winners
-
-        for m in self.meciuri[competitie]:
-            home_team = self.meciuri[competitie][m]["Home"]
-            away_team = self.meciuri[competitie][m]["Away"]
-            if self.only_home_away_maches:
-                home_team_matches = db.get_all_team_results_from_home(competitie, home_team)
-                if len(home_team_matches) < 4:
-                    print('{} - {}\t  {} are mai putin de 4 meciuri jucate acasa! Incerc sa iau si meciurile din deplasare!'.format(home_team, away_team, home_team))
-                    home_team_matches = db.get_all_team_results(competitie, home_team)
-
-                away_team_matches = db.get_all_team_results_from_away(competitie, away_team)
-                if len(away_team_matches) < 4:
-                    print('{} - {}\t  {} are mai putin de 4 meciuri jucate acasa! Incerc sa iau si meciurile din deplasare!'.format(home_team, away_team, away_team))
-                    away_team_matches = db.get_all_team_results(competitie, away_team)
-            else:
-                home_team_matches = db.get_all_team_results(competitie, home_team)
-                away_team_matches = db.get_all_team_results(competitie, away_team)
-
-            if len(home_team_matches) >= 4 and len(away_team_matches) >= 4:
-                # Iau doar ultimele 4 meciuri. Meciurile le primesc in ordinea id-urilor deci si in ordinea cronologica
-                # Nu ma intereseaza care din cele doua echipe a jucat un meci asa ca le pun intr-o lista comuna
-                required_matches = home_team_matches[-4:] + away_team_matches[-4:]
-                score = 0.0
-                for match in required_matches:
-                    # id, competitie, runda, id_meci, home_team, away_team, fh_ht_score, fh_at_score, sh_ht_score, sh_at_score
-                    if match[6] + match[7] + match[8] + match[9] > 2:
-                        score += 0.5
-                    else:
-                        score -= 0.5
-                    if (match[6] + match[8] > 0) and (match[7] + match[9] > 0):
-                        score += 0.75
-                    else:
-                        score -= 0.75
-
-                if abs(score) >= self.treshold:
-                    if score < 0:
-                        winners[competitie][m] = '{} - {} => UNDER 2.5 - score {}'.format(home_team, away_team, score)
-                    else:
-                        winners[competitie][m] = '{} - {} => OVER 2.5 - score {}'.format(home_team, away_team, score)
-        return winners
-
+            self.db.insert_record({'id_meci': match_id,
+                                   'competitie': match_info[match_id][1][1],
+                                   'home_team': match_info[match_id][1][2],
+                                   'away_team': match_info[match_id][1][3],
+                                   'match_date': match_info[match_id][1][4],
+                                   'prediction': predict},
+                                  json_must_exist=False)
+            if predict > 0:
+                print('PREDICTIE: {}'.format('PESTE 2,5' if score >= abs(self.treshold) else
+                                             'SUB 2.5' if score <= (-1 * abs(self.treshold))
+                                             else ''))
