@@ -28,7 +28,7 @@ _results_folder = None
 chromedriver = "chromedriver.exe"
 os.environ["webdriver.chrome.driver"] = chromedriver
 options = webdriver.ChromeOptions()
-options.add_argument("user-data-dir=C:\\Users\\atimofte\\AppData\\Local\\Google\\Chrome\\User Data")
+options.add_argument("user-data-dir={}\\AppData\\Local\\Google\\Chrome\\User Data".format(os.path.expanduser('~')))
 
 
 def wait_for_elem_by_css(driver, elem, timeout=2):
@@ -475,10 +475,11 @@ def kill_chrome():
 
 if __name__ == '__main__':
     kill_chrome()
-    if not os.path.isdir('results'):
+    if not os.path.isdir('data'):
         os.makedirs('data', exist_ok=True)
     driver = webdriver.Chrome(chromedriver, chrome_options=options)
     driver.implicitly_wait(10)
+    driver.maximize_window()
 
     pagina = '.custom-filter > li:nth-child({}) > a:nth-child(1)'
 

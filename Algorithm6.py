@@ -52,7 +52,7 @@ I usually place a bet only if I get a minimum +/-5 points result. So, for exampl
             away_stats = match_info[match_id][0]['Stats']['Away_History']
 
             for match in home_stats[:4]:
-                if sum(match[1:-1]) > 2:
+                if sum(match[1:-1]) > 1:
                     score += 0.5
                 else:
                     score -= 0.5
@@ -61,7 +61,7 @@ I usually place a bet only if I get a minimum +/-5 points result. So, for exampl
                 else:
                     score -= 0.75
             for match in away_stats[:4]:
-                if sum(match[1:-1]) > 2:
+                if sum(match[1:-1]) > 1:
                     score += 0.5
                 else:
                     score -= 0.5
@@ -71,7 +71,7 @@ I usually place a bet only if I get a minimum +/-5 points result. So, for exampl
                     score -= 0.75
 
             print(score)
-            predict = Constants.Predictions.FULL_TIME_OVER_25 if (score >= abs(self.treshold) or
+            predict = Constants.Predictions.FULL_TIME_OVER_15 if (score >= abs(self.treshold) or
                                                                   score <= (-1 * abs(self.treshold))) else 0
 
             self.db.insert_record({'id_meci': match_id,
@@ -82,6 +82,6 @@ I usually place a bet only if I get a minimum +/-5 points result. So, for exampl
                                    'prediction': predict},
                                   json_must_exist=False)
             if predict > 0:
-                print('PREDICTIE: {}'.format('PESTE 2,5' if score >= abs(self.treshold) else
-                                             'SUB 2.5' if score <= (-1 * abs(self.treshold))
+                print('PREDICTIE: {}'.format('PESTE 1,5' if score >= abs(self.treshold) else
+                                             'SUB 1.5' if score <= (-1 * abs(self.treshold))
                                              else ''))
