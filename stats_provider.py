@@ -10,12 +10,12 @@ class StatsProvider(threading.Thread):
         threading.Thread.__init__(self, args=(), kwargs=None)
         self.queue = queue
         self.daemon = True
-        # self.receive_messages = args[0]
+        self.name = 'StatsProvider'
         self.data_cache = []
         self.algorithms = []
 
     def run(self):
-        print(threading.currentThread().getName())
+        print('Starting thread {}'.format(self.name))
         while True:
             val = self.queue.get()
             if val is None:
@@ -37,8 +37,5 @@ class StatsProvider(threading.Thread):
                 with Constants.lock:
                     print(to_analyze)
                     self.data_cache.append(to_analyze)
-                    # print(threading.currentThread().getName(), "Received {}".format(message))
-                    # while len(self.data_cache) > 100:
-                    #     self.data_cache.pop(0)
                 for algorithm in self.algorithms:
                     algorithm.queue.put(to_analyze)

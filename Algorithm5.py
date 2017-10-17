@@ -12,7 +12,7 @@ class Algorithm5(Algorithm):
         Daca superbet.ro nu are in oferta un anumit tip de pariu (de ex. total goluri repriza 2) atunci se afiseaza
         doar recomandarea fara a se compara cu acea cota pentru a obtine Value Per Bet.
         """
-        print(self.name)
+        print('Starting thread {}'.format(self.name))
         self.db_name = 'algorithm5.db'
         self.init_db()
         self.treshold = 75
@@ -24,6 +24,46 @@ class Algorithm5(Algorithm):
 
     def analyze(self, match_info):
         print(self.name, "Analyzing: {}".format(match_info))
+        match_id = list(match_info.keys())[0]
+        home_stats = match_info[match_id][0]['Stats']['Home_Stats']
+        away_stats = match_info[match_id][0]['Stats']['Away_Stats']
+        if home_stats['J'] < 4 or away_stats['J'] < 4:
+            print('S-au jucat mai putin de 4 meciuri in aceasta competitie sau nu am clasamentul competitiei.'
+                  ' Nu pot analiza acest meci din punct de vedere al echipei castigatoare')
+            # TODO Daca nu am statisticile campionatului poate ar trebui sa folosesc
+            # istoricul in cazul in care este disponibil. As putea popula statistica folosind istoricul pentru a
+            # parcurge exact acelasi cod (sa nu am cod duplicat)
+        else:
+            home_wins_percentage = float(home_stats['V'] / home_stats['J'])
+            away_wins_percentage = float(away_stats['V'] / away_stats['J'])
+            home_draws_percentage = float(home_stats['E'] / home_stats['J'])
+            away_draws_percentage = float(away_stats['E'] / away_stats['J'])
+            home_lost_percentage = float(home_stats['I'] / home_stats['J'])
+            away_lost_percentage = float(away_stats['I'] / away_stats['J'])
+            home_goals_for_percentage = float(home_stats['GF'] / home_stats['J'])
+            away_goals_for_percentage = float(away_stats['GF'] / away_stats['J'])
+            home_goals_against_percentage = float(home_stats['GA'] / home_stats['J'])
+            away_goals_against_percentage = float(away_stats['GA'] / away_stats['J'])
+            home_points_per_game = float(home_stats['Pts'] / home_stats['J'])
+            away_points_per_game = float(away_stats['Pts'] / away_stats['J'])
+
+            # Inmultesc cu 10000, convertesc in int si apoi impart la 100 pentru a avea doar doua zecimale precizie
+            home_wins_odds = float(int((1 / home_wins_percentage) * 10000) / 100)
+            away_wins_odds = float(int((1 / away_wins_percentage) * 10000) / 100)
+            home_draws_odds = float(int((1 / home_draws_percentage) * 10000) / 100)
+            away_draws_odds = float(int((1 / away_draws_percentage) * 10000) / 100)
+            home_lost_odds = float(int((1 / home_lost_percentage) * 10000) / 100)
+            away_lost_odds = float(int((1 / away_lost_percentage) * 10000) / 100)
+
+            home_goals_for_odds = float(int((1 / home_goals_for_percentage) * 10000) / 100)
+            away_goals_for_odds = float(int((1 / away_goals_for_percentage) * 10000) / 100)
+            home_goals_against_odds = float(int((1 / home_goals_against_percentage) * 10000) / 100)
+            away_goals_against_odds = float(int((1 / away_goals_against_percentage) * 10000) / 100)
+
+
+
+
+
 #
 #
 # class Algorithm5:

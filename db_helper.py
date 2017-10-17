@@ -6,6 +6,9 @@ from constants import *
 
 
 class DBInterface:
+    # TODO De schimbat primary_key sa fie o lista pentru ca am nevoie de id_meci si match_date pentru a identifica unic
+    # o intrare in baza de date.
+    # TREBUIE MODIFICAT IN TOATE METODELE CLASEI NU DOAR IN __init__
     def __init__(self, db_file_name: str, table_name: str, columns: dict, primary_key: str,
                  create_only_if_not_exists=True):
         """
@@ -113,7 +116,7 @@ class DBInterface:
             return
         if not self.record_exists(values[self.primary_key], json_must_exist=json_must_exist):
             sql = self._construct_sql_statement(Constants.StatementTypes.INSERT_STATEMENT, values)
-            print(sql)
+            # print(sql)
             self.conn = sqlite3.connect(self.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
             cursor = self.conn.execute(sql)
             self.conn.commit()
@@ -121,7 +124,7 @@ class DBInterface:
             self.conn.close()
         elif update_if_exists:
             sql = self._construct_sql_statement(Constants.StatementTypes.UPDATE_STATEMENT, values)
-            print(sql)
+            # print(sql)
             self.conn = sqlite3.connect(self.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
             cursor = self.conn.execute(sql)
             self.conn.commit()
@@ -132,7 +135,7 @@ class DBInterface:
         if record_name is None:
             record_name = self.primary_key
         sql = self._construct_sql_statement(Constants.StatementTypes.DELETE_STATEMENT, {record_name: record_value})
-        print(sql)
+        # print(sql)
         self.conn = sqlite3.connect(self.db_file, detect_types=sqlite3.PARSE_DECLTYPES)
         cursor = self.conn.execute(sql)
         self.conn.commit()

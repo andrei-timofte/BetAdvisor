@@ -27,7 +27,7 @@ That would mean to put a 3.5/10 units bet on over 2.5 goals. The maximum results
 
 I usually place a bet only if I get a minimum +/-5 points result. So, for example, if I get a +6 I place a 6/10 units bet on over 2.5 goals. 
         """
-        print(self.name)
+        print('Starting thread {}'.format(self.name))
         self.db_name = 'algorithm6.db'
         self.init_db()
         self.treshold = 6
@@ -40,48 +40,75 @@ I usually place a bet only if I get a minimum +/-5 points result. So, for exampl
     def analyze(self, match_info):
         print(self.name, "Analyzing: {}".format(match_info))
         match_id = list(match_info.keys())[0]
-        if self.db.record_exists(int(match_id)):
-            predictie = self.db.get_records(match_id)
+        if self.db.record_exists(int(match_id), json_must_exist=False):
+            predictie = self.db.get_records(self.db.primary_key, match_id)
             if predictie[-1] != 0:
-                print(predictie[-1])
-            print('Am deja analiza mecului cu id {}:{}'.format(match_id, 'Aici vine analiza!'))
+                print(predictie[-1])  # TODO Remove debug line
+                print('Am deja analiza mecului cu id {}: {}'.format(match_id,
+                                                                    goals_to_str(predictie[-1][-1])))
         else:
             # Analiza propriu-zisa
-            score = 0
             home_stats = match_info[match_id][0]['Stats']['Home_History']
             away_stats = match_info[match_id][0]['Stats']['Away_History']
 
-            for match in home_stats[:4]:
-                if sum(match[1:-1]) > 1:
-                    score += 0.5
-                else:
-                    score -= 0.5
-                if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
-                    score += 0.75
-                else:
-                    score -= 0.75
-            for match in away_stats[:4]:
-                if sum(match[1:-1]) > 1:
-                    score += 0.5
-                else:
-                    score -= 0.5
-                if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
-                    score += 0.75
-                else:
-                    score -= 0.75
+            prediction = Constants.Predictions.NO_PREDICTION
+            for goals in range(1, 5):
+                score = 0
+                target_verdict_over = Constants.Predictions.Goals.FULL_TIME_OVER_05 if goals == 1 else Constants.Predictions.Goals.FULL_TIME_OVER_15 if goals == 2 else Constants.Predictions.Goals.FULL_TIME_OVER_25 if goals == 3 else Constants.Predictions.Goals.FULL_TIME_OVER_35
+                target_verdict_under = Constants.Predictions.Goals.FULL_TIME_UNDER_05 if goals == 1 else Constants.Predictions.Goals.FULL_TIME_UNDER_15 if goals == 2 else Constants.Predictions.Goals.FULL_TIME_UNDER_25 if goals == 3 else Constants.Predictions.Goals.FULL_TIME_UNDER_35
 
-            print(score)
-            predict = Constants.Predictions.FULL_TIME_OVER_15 if (score >= abs(self.treshold) or
-                                                                  score <= (-1 * abs(self.treshold))) else 0
+                # print(target_verdict_over)
+                # print(target_verdict_under)
+
+                for match in home_stats[:4]:
+                    if sum(match[1:-1]) > 1:
+                        score += 0.5
+                    else:
+                        score -= 0.5
+                    if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
+                        score += 0.75
+                    else:
+                        score -= 0.75
+                for match in away_stats[:4]:
+                    if sum(match[1:-1]) > 1:
+                        score += 0.5
+                    else:
+                        score -= 0.5
+                    if (match[1] + match[3]) > 0 and (match[2] + match[4]) > 0:
+                        score += 0.75
+                    else:
+                        score -= 0.75
+
+                # print(score)
+                prediction = prediction | (target_verdict_over if score >= self.treshold else Constants.Predictions.NO_PREDICTION)
+                prediction = prediction | (target_verdict_under if score <= (-1 * self.treshold) else Constants.Predictions.NO_PREDICTION)
 
             self.db.insert_record({'id_meci': match_id,
                                    'competitie': match_info[match_id][1][1],
                                    'home_team': match_info[match_id][1][2],
                                    'away_team': match_info[match_id][1][3],
                                    'match_date': match_info[match_id][1][4],
-                                   'prediction': predict},
+                                   'win_prediction': Constants.Predictions.NO_PREDICTION,
+                                   'score_prediction': Constants.Predictions.NO_PREDICTION,
+                                   'goals_prediction': prediction},
                                   json_must_exist=False)
-            if predict > 0:
-                print('PREDICTIE: {}'.format('PESTE 1,5' if score >= abs(self.treshold) else
-                                             'SUB 1.5' if score <= (-1 * abs(self.treshold))
-                                             else ''))
+
+            if prediction > 0:
+                if (prediction & Constants.Predictions.Goals.FULL_TIME_OVER_05) > 0:
+                    print('Over 0.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_OVER_15:
+                    print('Over 1.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_OVER_25:
+                    print('Over 2.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_OVER_35:
+                    print('Over 3.5')
+                if (prediction & Constants.Predictions.Goals.FULL_TIME_UNDER_05) > 0:
+                    print('Under 0.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_UNDER_15:
+                    print('Under 1.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_UNDER_25:
+                    print('Under 2.5')
+                if prediction & Constants.Predictions.Goals.FULL_TIME_UNDER_35:
+                    print('Under 3.5')
+            else:
+                print('No prediction!')
