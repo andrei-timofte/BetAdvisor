@@ -8,7 +8,7 @@ from constants import *
 
 
 class Algorithm(threading.Thread):
-    def __init__(self):
+    def __init__(self, reanalyze):
         threading.Thread.__init__(self, args=(), kwargs=None)
         self.daemon = True
         self.name = "Algorithm Base class"
@@ -18,6 +18,7 @@ class Algorithm(threading.Thread):
         self.queue = Queue(maxsize=-1)
         self.db = None
         self.db_name = 'algorithm.db'
+        self.reanalyze = reanalyze
 
     def init_db(self):
         self.db = DBInterface(db_file_name=self.db_name,
@@ -29,3 +30,8 @@ class Algorithm(threading.Thread):
     def analyze(self, match_info):
         print(self.name, "Analyzing: {}".format(match_info))
 
+    @staticmethod
+    def odds_from_percentage(percentage):
+        if percentage > 0:
+            return float(int((1 / percentage) * 10000) / 10000)
+        return 1.00

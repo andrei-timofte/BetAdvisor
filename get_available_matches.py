@@ -1,3 +1,4 @@
+import sys
 import os
 import subprocess
 import time
@@ -100,16 +101,16 @@ def get_scores(driver, hover_element, interess_team):
                     if (new_time - init_time) > timeout:
                         split_score = False
                     time.sleep(.1)
-        else:
-            print("Skiping ht_fh_score search!")
+        # else:
+            # print("Skiping ht_fh_score search!")
         if split_score:
             if at_fh_score == -1:
                 try:
                     at_fh_score = int(driver.find_element_by_css_selector(at_fh_id).text)
                 except:
                     time.sleep(.1)
-        else:
-            print("Skiping at_fh_score search!")
+        # else:
+        #     print("Skiping at_fh_score search!")
 
         if ht_sh_score == -1:
             try:
@@ -407,10 +408,21 @@ def get_over_under_stats(driver):
 
     for option in option_list:
         if click:
+            time.sleep(1)
             card = driver.find_element_by_css_selector(under_over_card_id)
             dropdown = card.find_element(By.CSS_SELECTOR, dropdown_id)
-            dropdown.click()
-            time.sleep(.5)
+            driver.execute_script('arguments[0].scrollIntoView();', dropdown)
+            try:
+                dropdown.click()
+            except:
+                dropdown = card.find_element(By.CSS_SELECTOR, dropdown_id)
+                driver.execute_script('arguments[0].scrollIntoView();', dropdown)
+                body = driver.find_element_by_css_selector('body')
+                for i in range(2):
+                    body.send_keys(Keys.ARROW_UP)
+                    time.sleep(.1)
+                dropdown.click()
+            time.sleep(1)
 
         current_option_text = option.text
         option.click()
@@ -427,30 +439,37 @@ def get_over_under_stats(driver):
         over_under_options = over_under_element.find_elements(By.CSS_SELECTOR, "div[class='htab']")
         no_options = len(over_under_options)
         for over_under_option_no in range(no_options):
-            try:
-                card = driver.find_element_by_css_selector(under_over_card_id)
-                over_under_element = card.find_element(By.CSS_SELECTOR, over_under_id)
-                over_under_options = over_under_element.find_elements(By.CSS_SELECTOR, "div[class='htab']")
-                over_under_option = over_under_options[over_under_option_no]
-                sub_key = over_under_option.text
-                over_under_option.click()
-                time.sleep(2)  # TODO De vazut daca poate fi indepartat sleep-ul asta si inlocuit cu ceva safe
-                # Iau doar stats pentru PESTE, cele de UNDER pot fi deduse (100 - PESTE = UNDER)
-                team1_stats_element = card.find_element(By.CSS_SELECTOR, "div[class='team1']")
-                team2_stats_element = card.find_element(By.CSS_SELECTOR, "div[class='team2']")
-                t1over_el = team1_stats_element.find_element(By.CSS_SELECTOR, "div[class='over']")
-                t1_percent_element = t1over_el.find_element(By.CSS_SELECTOR, "span[class='numbers']")
-                t1over_percent = float(t1_percent_element.text.split('(')[1].split('%')[0])
-                t2over_el = team2_stats_element.find_element(By.CSS_SELECTOR, "div[class='over']")
-                t2_percent_element = t2over_el.find_element(By.CSS_SELECTOR, "span[class='numbers']")
-                t2over_percent = float(t2_percent_element.text.split('(')[1].split('%')[0])
-                result["1"][key][sub_key] = t1over_percent
-                result["2"][key][sub_key] = t2over_percent
-            except Exception as e:
-                # Exista statistici doar pe total goluri per meci, nu neaparat pe fiecare repriza
-                # print(e.args)
-                # traceback.print_tb(e.__traceback__)
-                time.sleep(.1)
+            for _ in range(10):  # TODO De vazut daca poate fi micsorat range-ul
+                try:
+                    card = driver.find_element_by_css_selector(under_over_card_id)
+                    over_under_element = card.find_element(By.CSS_SELECTOR, over_under_id)
+                    over_under_options = over_under_element.find_elements(By.CSS_SELECTOR, "div[class='htab']")
+                    over_under_option = over_under_options[over_under_option_no]
+                    sub_key = over_under_option.text
+                    # print(sub_key)
+                    over_under_option.click()
+                    time.sleep(.5)
+                    # Iau doar stats pentru PESTE, cele de UNDER pot fi deduse (100 - PESTE = UNDER)
+                    team1_stats_element = card.find_element(By.CSS_SELECTOR, "div[class='team1']")
+                    team2_stats_element = card.find_element(By.CSS_SELECTOR, "div[class='team2']")
+                    t1over_el = team1_stats_element.find_element(By.CSS_SELECTOR, "div[class='over']")
+                    t1_percent_element = t1over_el.find_element(By.CSS_SELECTOR, "span[class='numbers']")
+                    # print(t1_percent_element.text)
+                    t1over_percent = float(t1_percent_element.text.split('(')[1].split('%')[0])
+                    # print(t1over_percent)
+                    t2over_el = team2_stats_element.find_element(By.CSS_SELECTOR, "div[class='over']")
+                    t2_percent_element = t2over_el.find_element(By.CSS_SELECTOR, "span[class='numbers']")
+                    # print(t2_percent_element.text)
+                    t2over_percent = float(t2_percent_element.text.split('(')[1].split('%')[0])
+                    # print(t2over_percent)
+                    result["1"][key][sub_key] = t1over_percent
+                    result["2"][key][sub_key] = t2over_percent
+                    break
+                except Exception as e:
+                    # Exista statistici doar pe total goluri per meci, nu neaparat pe fiecare repriza
+                    # print(e.args)
+                    # traceback.print_tb(e.__traceback__)
+                    time.sleep(.5)
     return result
 
 
@@ -474,6 +493,7 @@ def kill_chrome():
 
 
 if __name__ == '__main__':
+    reanalyze = 'reanalyze' in sys.argv
     kill_chrome()
     if not os.path.isdir('data'):
         os.makedirs('data', exist_ok=True)
@@ -515,7 +535,7 @@ if __name__ == '__main__':
     stats_prov.start()
     algorithms = [Algorithm5, Algorithm6]
     for algor in algorithms:
-        alg = algor()
+        alg = algor(reanalyze)
         alg.start()
         stats_prov.algorithms.append(alg)
 
@@ -533,6 +553,7 @@ if __name__ == '__main__':
 
             wait_for_elem_by_css(driver, but_sporturi)
             driver.find_element_by_css_selector(but_sporturi).click()
+            time.sleep(1)
             wait_for_elem_by_css(driver, '.open > ul:nth-child(2)')
             sports_elem = driver.find_element_by_css_selector('.open > ul:nth-child(2)')
             sports = sports_elem.find_elements(By.CSS_SELECTOR, 'li')
@@ -622,8 +643,8 @@ if __name__ == '__main__':
                                                 'div.left:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
                                             a_team = driver.find_element_by_css_selector(
                                                 '.h2h_teamselect2 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1)').text
-                                            print(h_team)
-                                            print(a_team)
+                                            # print(h_team)
+                                            # print(a_team)
                                             tab_tendency = driver.find_element_by_css_selector(
                                                 "div[class='tendencyteam1']")
                                             prev_stats = tab_tendency.find_elements(By.CSS_SELECTOR, 'li[class]')
@@ -632,7 +653,7 @@ if __name__ == '__main__':
                                                 tend_txt = unicodedata.normalize('NFKD', tend.text).encode('ASCII',
                                                                                                            'ignore').decode(
                                                     'utf-8')
-                                                print(tend_txt)
+                                                # print(tend_txt)
                                                 if len(tend_txt.strip()) < 1:
                                                     print("Skiping current tendency element - 0 length text!")
                                                     continue
@@ -663,20 +684,20 @@ if __name__ == '__main__':
                                                                     (ht_fh != -1 and at_fh != -1) or (
                                                                                 ht_fh == -1 and at_fh == -1)):
                                                             success = True
-                                                            print("{}:{}".format(ht_fh, at_fh))
-                                                            print("{}:{}".format(ht_sh, at_sh))
+                                                            # print("{}:{}".format(ht_fh, at_fh))
+                                                            # print("{}:{}".format(ht_sh, at_sh))
                                                             curr_tend.append(ht_fh)
                                                             curr_tend.append(at_fh)
                                                             curr_tend.append(ht_sh)
                                                             curr_tend.append(at_sh)
                                                             curr_tend.append(loc)
-                                                            if loc:
-                                                                print('Home match')
-                                                            else:
-                                                                print('Away match')
+                                                            # if loc:
+                                                            #     print('Home match')
+                                                            # else:
+                                                            #     print('Away match')
                                                             meci_json['Stats']['Home_History'].append(
                                                                 copy.deepcopy(curr_tend))
-                                            print('#' * 100)
+                                            # print('#' * 100)
                                             tab_tendency = driver.find_element_by_css_selector(
                                                 "div[class='tendencyteam2']")
                                             prev_stats = tab_tendency.find_elements(By.CSS_SELECTOR, 'li[class]')
@@ -685,7 +706,7 @@ if __name__ == '__main__':
                                                 tend_txt = unicodedata.normalize('NFKD', tend.text).encode('ASCII',
                                                                                                            'ignore').decode(
                                                     'utf-8')
-                                                print(tend_txt)
+                                                # print(tend_txt)
                                                 if len(tend_txt.strip()) < 1:
                                                     print("Skiping current tendency element - 0 length text!")
                                                     continue
@@ -716,17 +737,17 @@ if __name__ == '__main__':
                                                                     (ht_fh != -1 and at_fh != -1) or (
                                                                                 ht_fh == -1 and at_fh == -1)):
                                                             success = True
-                                                            print("{}:{}".format(ht_fh, at_fh))
-                                                            print("{}:{}".format(ht_sh, at_sh))
+                                                            # print("{}:{}".format(ht_fh, at_fh))
+                                                            # print("{}:{}".format(ht_sh, at_sh))
                                                             curr_tend.append(ht_fh)
                                                             curr_tend.append(at_fh)
                                                             curr_tend.append(ht_sh)
                                                             curr_tend.append(at_sh)
                                                             curr_tend.append(loc)
-                                                            if loc:
-                                                                print('Home match')
-                                                            else:
-                                                                print('Away match')
+                                                            # if loc:
+                                                            #     print('Home match')
+                                                            # else:
+                                                            #     print('Away match')
                                                             meci_json['Stats']['Away_History'].append(
                                                                 copy.deepcopy(curr_tend))
                                             meci_json['Stats']['H2H_History'] = {}
@@ -734,19 +755,19 @@ if __name__ == '__main__':
                                                                  "div[class='couch_headtohead_historygraph']")
                                             ht_wins, draws, at_wins = get_h2h_results(driver,
                                                                                       "div[class='couch_headtohead_historygraph']")
-                                            print("H2H: \n{}\n{}\n{}\n\n".format(ht_wins, draws, at_wins))
+                                            # print("H2H: \n{}\n{}\n{}\n\n".format(ht_wins, draws, at_wins))
                                             meci_json['Stats']['H2H_History']['Home_Wins'] = copy.deepcopy(ht_wins)
                                             meci_json['Stats']['H2H_History']['Draws'] = copy.deepcopy(draws)
                                             meci_json['Stats']['H2H_History']['Away_Wins'] = copy.deepcopy(at_wins)
                                             ranks = get_teams_ranks_and_stats(driver,
                                                                               "div.headtohead_twoteams_leaguetable")
-                                            print("{} stats: {}".format(echipa1, ranks["1"]))
-                                            print("{} stats: {}".format(echipa2, ranks["2"]))
+                                            # print("{} stats: {}".format(echipa1, ranks["1"]))
+                                            # print("{} stats: {}".format(echipa2, ranks["2"]))
                                             meci_json['Stats']['Home_Stats'] = copy.deepcopy(ranks["1"])
                                             meci_json['Stats']['Away_Stats'] = copy.deepcopy(ranks["2"])
-                                            print()
+                                            # print()
                                             over_under_stats = get_over_under_stats(driver)
-                                            print(over_under_stats)
+                                            # print(over_under_stats)
                                             meci_json['Stats']['Home_Over_Under'] = copy.deepcopy(over_under_stats["1"])
                                             meci_json['Stats']['Away_Over_Under'] = copy.deepcopy(over_under_stats["2"])
                                             json_fname = get_next_match_fname(id_meci)
@@ -761,8 +782,8 @@ if __name__ == '__main__':
                                                                                update_if_exists=True)
                                             stats_prov.queue.put(id_meci)
                                         except Exception as e:
-                                            # print(e.args)
-                                            # traceback.print_tb(e.__traceback__)
+                                            print(e.args)
+                                            traceback.print_tb(e.__traceback__)
                                             print(
                                                 "Nu am gasit elementul STATS pentru meciul {} - {}".format(echipa1,
                                                                                                            echipa2))

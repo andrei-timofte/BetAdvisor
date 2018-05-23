@@ -131,29 +131,29 @@ def score_to_str(what):
     result = 'SCORE - '
     if what == Constants.Predictions.NO_PREDICTION:
         result += 'No prediction '
-    if what == Constants.Predictions.Score.FULL_TIME_HOME_TEAM_SCORES:
+    if what & Constants.Predictions.Score.FULL_TIME_HOME_TEAM_SCORES:
         result += 'Home team scores in match '
-    if what == Constants.Predictions.Score.FULL_TIME_AWAY_TEAM_SCORES:
+    if what & Constants.Predictions.Score.FULL_TIME_AWAY_TEAM_SCORES:
         result += 'Away team scores in match '
-    if what == Constants.Predictions.Score.FIRST_HALF_HOME_TEAM_SCORES:
+    if what & Constants.Predictions.Score.FIRST_HALF_HOME_TEAM_SCORES:
         result += 'Home team scores in 1st half '
-    if what == Constants.Predictions.Score.FIRST_HALF_AWAY_TEAM_SCORES:
+    if what & Constants.Predictions.Score.FIRST_HALF_AWAY_TEAM_SCORES:
         result += 'Away team scores in 1st half '
-    if what == Constants.Predictions.Score.SECOND_HALF_HOME_TEAM_SCORES:
+    if what & Constants.Predictions.Score.SECOND_HALF_HOME_TEAM_SCORES:
         result += 'Home team scores in 2nd half '
-    if what == Constants.Predictions.Score.SECOND_HALF_AWAY_TEAM_SCORES:
+    if what & Constants.Predictions.Score.SECOND_HALF_AWAY_TEAM_SCORES:
         result += 'Away team scores in 2nd half '
-    if what == Constants.Predictions.Score.FULL_TIME_HOME_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.FULL_TIME_HOME_TEAM_NO_SCORE:
         result += 'Home team doesn`t scores in match '
-    if what == Constants.Predictions.Score.FULL_TIME_AWAY_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.FULL_TIME_AWAY_TEAM_NO_SCORE:
         result += 'Away team doesn`t scores in match '
-    if what == Constants.Predictions.Score.FIRST_HALF_HOME_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.FIRST_HALF_HOME_TEAM_NO_SCORE:
         result += 'Home team doesn`t scores in 1st half '
-    if what == Constants.Predictions.Score.FIRST_HALF_AWAY_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.FIRST_HALF_AWAY_TEAM_NO_SCORE:
         result += 'Away team doesn`t scores in 1st half '
-    if what == Constants.Predictions.Score.SECOND_HALF_HOME_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.SECOND_HALF_HOME_TEAM_NO_SCORE:
         result += 'Home team doesn`t scores in 2nd half '
-    if what == Constants.Predictions.Score.SECOND_HALF_AWAY_TEAM_NO_SCORE:
+    if what & Constants.Predictions.Score.SECOND_HALF_AWAY_TEAM_NO_SCORE:
         result += 'Away team doesn`t scores in 2nd half '
     if len(result) == 8:
         result += 'UNDEFINED'
@@ -164,53 +164,53 @@ def goals_to_str(what):
     result = 'GOALS - '
     if what == Constants.Predictions.NO_PREDICTION:
         result += 'No prediction '
-    if what == Constants.Predictions.Goals.FULL_TIME_OVER_05:
+    if what & Constants.Predictions.Goals.FULL_TIME_OVER_05:
         result += 'Over 0.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_OVER_15:
+    if what & Constants.Predictions.Goals.FULL_TIME_OVER_15:
         result += 'Over 1.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_OVER_25:
+    if what & Constants.Predictions.Goals.FULL_TIME_OVER_25:
         result += 'Over 2.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_OVER_35:
+    if what & Constants.Predictions.Goals.FULL_TIME_OVER_35:
         result += 'Over 3.5 goals in match '
-    if what == Constants.Predictions.Goals.FIRST_HALF_OVER_05:
+    if what & Constants.Predictions.Goals.FIRST_HALF_OVER_05:
         result += 'Over 0.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_OVER_15:
+    if what & Constants.Predictions.Goals.FIRST_HALF_OVER_15:
         result += 'Over 1.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_OVER_25:
+    if what & Constants.Predictions.Goals.FIRST_HALF_OVER_25:
         result += 'Over 2.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_OVER_35:
+    if what & Constants.Predictions.Goals.FIRST_HALF_OVER_35:
         result += 'Over 3.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_OVER_05:
+    if what & Constants.Predictions.Goals.SECOND_HALF_OVER_05:
         result += 'Over 0.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_OVER_15:
+    if what & Constants.Predictions.Goals.SECOND_HALF_OVER_15:
         result += 'Over 1.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_OVER_25:
+    if what & Constants.Predictions.Goals.SECOND_HALF_OVER_25:
         result += 'Over 2.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_OVER_35:
+    if what & Constants.Predictions.Goals.SECOND_HALF_OVER_35:
         result += 'Over 3.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.FULL_TIME_UNDER_05:
+    if what & Constants.Predictions.Goals.FULL_TIME_UNDER_05:
         result += 'Under 0.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_UNDER_15:
+    if what & Constants.Predictions.Goals.FULL_TIME_UNDER_15:
         result += 'Under 1.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_UNDER_25:
+    if what & Constants.Predictions.Goals.FULL_TIME_UNDER_25:
         result += 'Under 2.5 goals in match '
-    if what == Constants.Predictions.Goals.FULL_TIME_UNDER_35:
+    if what & Constants.Predictions.Goals.FULL_TIME_UNDER_35:
         result += 'Under 3.5 goals in match '
-    if what == Constants.Predictions.Goals.FIRST_HALF_UNDER_05:
+    if what & Constants.Predictions.Goals.FIRST_HALF_UNDER_05:
         result += 'Under 0.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_UNDER_15:
+    if what & Constants.Predictions.Goals.FIRST_HALF_UNDER_15:
         result += 'Under 1.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_UNDER_25:
+    if what & Constants.Predictions.Goals.FIRST_HALF_UNDER_25:
         result += 'Under 2.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.FIRST_HALF_UNDER_35:
+    if what & Constants.Predictions.Goals.FIRST_HALF_UNDER_35:
         result += 'Under 3.5 goals in 1st half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_UNDER_05:
+    if what & Constants.Predictions.Goals.SECOND_HALF_UNDER_05:
         result += 'Under 0.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_UNDER_15:
+    if what & Constants.Predictions.Goals.SECOND_HALF_UNDER_15:
         result += 'Under 1.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_UNDER_25:
+    if what & Constants.Predictions.Goals.SECOND_HALF_UNDER_25:
         result += 'Under 2.5 goals in 2nd half '
-    if what == Constants.Predictions.Goals.SECOND_HALF_UNDER_35:
+    if what & Constants.Predictions.Goals.SECOND_HALF_UNDER_35:
         result += 'Under 3.5 goals in 2nd half '
     if len(result) == 8:
         result += 'UNDEFINED'

@@ -27,7 +27,7 @@ class StatsProvider(threading.Thread):
         new_match = Constants.meciuri_db.get_records(Constants.meciuri_db.primary_key, message)
         # new_match ar trebui sa aiba len >=0 <=1
         if len(new_match) > 0:
-            print(new_match[0])
+            # print(new_match[0])
             json_file = 'data\\{}'.format(new_match[0][5])
             if os.path.isfile(json_file):
                 with open(json_file, 'rt') as f:
@@ -35,7 +35,7 @@ class StatsProvider(threading.Thread):
                 to_analyze = dict()
                 to_analyze[message] = [new_info, new_match[0]]
                 with Constants.lock:
-                    print(to_analyze)
+                    # print(to_analyze)
                     self.data_cache.append(to_analyze)
                 for algorithm in self.algorithms:
                     algorithm.queue.put(to_analyze)
